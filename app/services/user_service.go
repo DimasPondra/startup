@@ -9,6 +9,7 @@ import (
 
 type UserService interface {
 	Register(request structs.RegisterRequest) (structs.User, error)
+	Login(request structs.LoginRequest) (structs.User, error)
 }
 
 type userService struct {
@@ -41,4 +42,18 @@ func (s *userService) Register(request structs.RegisterRequest) (structs.User, e
 	}
 
 	return newUser, nil
+}
+
+func (s *userService) Login(request structs.LoginRequest) (structs.User, error) {
+	user, err := s.userRepo.FindByEmail(request.Email)
+	if err != nil {
+		return user, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password))
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }

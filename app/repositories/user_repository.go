@@ -8,6 +8,7 @@ import (
 
 type UserRepository interface {
 	Save(user structs.User) (structs.User, error)
+	FindByEmail(email string) (structs.User, error)
 }
 
 type userRepository struct {
@@ -20,6 +21,18 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 
 func (r *userRepository) Save(user structs.User) (structs.User, error) {
 	err := r.db.Create(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) FindByEmail(email string) (structs.User, error) {
+	var user structs.User
+
+	err := r.db.Where("email = ?", email).First(&user).Error
 
 	if err != nil {
 		return user, err

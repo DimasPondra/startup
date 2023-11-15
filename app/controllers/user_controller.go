@@ -25,21 +25,46 @@ func (h *userController) Register(c *gin.Context) {
 		errors := helpers.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
 
-		response := helpers.ResponseAPI("Register account failed", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
+		res := helpers.ResponseAPI("Register account failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
 
 	user, err := h.userService.Register(request)
 	if err != nil {
-		response := helpers.ResponseAPI("Register account failed", http.StatusBadRequest, "error", nil)
-		c.JSON(http.StatusBadRequest, response)
+		res := helpers.ResponseAPI("Register account failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
 	formatter := structs.UserResponse(user, "tokentokentoken")
+	res := helpers.ResponseAPI("Account successfully registered.", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, res)
+}
 
-	response := helpers.ResponseAPI("Account successfully registered.", http.StatusOK, "success", formatter)
+func (h *userController) Login(c *gin.Context) {
+	var request structs.LoginRequest
 
-	c.JSON(http.StatusOK, response)
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		res := helpers.ResponseAPI("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
+	user, err := h.userService.Login(request)
+	if err != nil {
+		errorMessage := gin.H{"errors": "email or password invalid."}
+
+		res := helpers.ResponseAPI("Login failed", http.StatusUnauthorized, "error", errorMessage)
+		c.JSON(http.StatusUnauthorized, res)
+		return
+	}
+
+	formatter := structs.UserResponse(user, "tokentokentoken")
+	res := helpers.ResponseAPI("Successfully logged in", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, res)
 }
