@@ -11,10 +11,11 @@ import (
 
 type userController struct {
 	userService services.UserService
+	authService services.AuthService
 }
 
-func NewUserController(userService services.UserService) *userController {
-	return &userController{userService}
+func NewUserController(userService services.UserService, authService services.AuthService) *userController {
+	return &userController{userService, authService}
 }
 
 func (h *userController) Register(c *gin.Context) {
@@ -37,7 +38,15 @@ func (h *userController) Register(c *gin.Context) {
 		return
 	}
 
-	formatter := structs.UserResponse(user, "tokentokentoken")
+	token, err := h.authService.GenerateToken(user.ID)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	formatter := structs.UserResponse(user, token)
 	res := helpers.ResponseAPI("Account successfully registered.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
@@ -64,7 +73,15 @@ func (h *userController) Login(c *gin.Context) {
 		return
 	}
 
-	formatter := structs.UserResponse(user, "tokentokentoken")
+	token, err := h.authService.GenerateToken(user.ID)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	formatter := structs.UserResponse(user, token)
 	res := helpers.ResponseAPI("Successfully logged in", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
