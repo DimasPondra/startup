@@ -26,6 +26,10 @@ type LoginRequest struct {
 	Password 	string `json:"password" binding:"required,min=6"`
 }
 
+type CheckEmailRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
 type userResponse struct {
 	ID 			int 	`json:"id"`
 	Name 		string 	`json:"name"`

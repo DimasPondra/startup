@@ -10,6 +10,7 @@ import (
 type UserService interface {
 	Register(request structs.RegisterRequest) (structs.User, error)
 	Login(request structs.LoginRequest) (structs.User, error)
+	IsEmailAvailable(request structs.CheckEmailRequest) (bool, error)
 }
 
 type userService struct {
@@ -56,4 +57,13 @@ func (s *userService) Login(request structs.LoginRequest) (structs.User, error) 
 	}
 
 	return user, nil
+}
+
+func (s *userService) IsEmailAvailable(request structs.CheckEmailRequest) (bool, error) {
+	_, err := s.userRepo.FindByEmail(request.Email)
+	if err != nil {
+		return true, err
+	}
+
+	return false, err
 }
