@@ -95,3 +95,37 @@ func (h *userController) CheckEmailAvailability(c *gin.Context) {
 	res := helpers.ResponseAPI(message, http.StatusOK, "success", data)
 	c.JSON(http.StatusOK, res)
 }
+
+func (h *userController) UploadAvatar(c *gin.Context) {
+	file, err := c.FormFile("file")
+
+	if err != nil {
+		data := gin.H{"errors": "avatar is required."}
+		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusUnprocessableEntity, "error", data)
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
+	filename := helpers.GenerateRandomFileName(file.Filename)
+	path := "images/avatars/" + filename
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusBadRequest, "error", data)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	_, err = h.userService.SaveAvatar(7, path)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusBadRequest, "error", data)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	data := gin.H{"is_uploaded": true}
+	res := helpers.ResponseAPI("Avatar successfully uploaded.", http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, res)
+}

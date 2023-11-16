@@ -9,6 +9,8 @@ import (
 type UserRepository interface {
 	Save(user structs.User) (structs.User, error)
 	FindByEmail(email string) (structs.User, error)
+	FindByID(id int) (structs.User, error)
+	Update(user structs.User) (structs.User, error)
 }
 
 type userRepository struct {
@@ -34,6 +36,28 @@ func (r *userRepository) FindByEmail(email string) (structs.User, error) {
 
 	err := r.db.Where("email = ?", email).First(&user).Error
 
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) FindByID(id int) (structs.User, error) {
+	var user structs.User
+
+	err := r.db.Where("id = ?", id).First(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) Update(user structs.User) (structs.User, error) {
+	err := r.db.Save(&user).Error
+	
 	if err != nil {
 		return user, err
 	}

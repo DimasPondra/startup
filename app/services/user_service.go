@@ -11,6 +11,7 @@ type UserService interface {
 	Register(request structs.RegisterRequest) (structs.User, error)
 	Login(request structs.LoginRequest) (structs.User, error)
 	IsEmailAvailable(request structs.CheckEmailRequest) (bool, error)
+	SaveAvatar(id int, fileLocation string) (structs.User, error)
 }
 
 type userService struct {
@@ -66,4 +67,20 @@ func (s *userService) IsEmailAvailable(request structs.CheckEmailRequest) (bool,
 	}
 
 	return false, err
+}
+
+func (s *userService) SaveAvatar(id int, fileLocation string) (structs.User, error) {
+	user, err := s.userRepo.FindByID(id)
+	if err != nil {
+		return user, err
+	}
+
+	user.AvatarFileName = fileLocation
+
+	userUpdated, err := s.userRepo.Update(user)
+	if err != nil {
+		return userUpdated, err
+	}
+
+	return userUpdated, nil
 }
