@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"startup/app/controllers"
+	"startup/app/middlewares"
 	"startup/app/repositories"
 	"startup/app/services"
 
@@ -38,7 +39,9 @@ func main() {
 	api.POST("/auth/register", userController.Register)
 	api.POST("/auth/login", userController.Login)
 	api.POST("/auth/check-email", userController.CheckEmailAvailability)
-	api.POST("/auth/avatar", userController.UploadAvatar)
+
+	api.GET("/users", middlewares.AuthMiddleware(authService, userService), userController.FetchUser)
+	api.POST("/users/avatar", middlewares.AuthMiddleware(authService, userService), userController.UploadAvatar)
 
 	router.Run()
 }

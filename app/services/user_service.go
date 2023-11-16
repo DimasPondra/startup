@@ -12,6 +12,7 @@ type UserService interface {
 	Login(request structs.LoginRequest) (structs.User, error)
 	IsEmailAvailable(request structs.CheckEmailRequest) (bool, error)
 	SaveAvatar(id int, fileLocation string) (structs.User, error)
+	GetUserByID(id int) (structs.User, error)
 }
 
 type userService struct {
@@ -83,4 +84,14 @@ func (s *userService) SaveAvatar(id int, fileLocation string) (structs.User, err
 	}
 
 	return userUpdated, nil
+}
+
+func (s *userService) GetUserByID(id int) (structs.User, error) {
+	user, err := s.userRepo.FindByID(id)
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }

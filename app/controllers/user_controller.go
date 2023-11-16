@@ -134,7 +134,9 @@ func (h *userController) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	_, err = h.userService.SaveAvatar(7, path)
+	currentUser := c.MustGet("currentUser").(structs.User)
+
+	_, err = h.userService.SaveAvatar(currentUser.ID, path)
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
 		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusBadRequest, "error", data)
@@ -144,5 +146,14 @@ func (h *userController) UploadAvatar(c *gin.Context) {
 
 	data := gin.H{"is_uploaded": true}
 	res := helpers.ResponseAPI("Avatar successfully uploaded.", http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *userController) FetchUser(c *gin.Context) {
+	currentUser := c.MustGet("currentUser").(structs.User)
+	
+	formatter := structs.UserResponse(currentUser, "")
+
+	res := helpers.ResponseAPI("Successfully fetch user data.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }

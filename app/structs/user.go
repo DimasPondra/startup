@@ -1,6 +1,9 @@
 package structs
 
-import "time"
+import (
+	"os"
+	"time"
+)
 
 type User struct {
 	ID             int
@@ -36,15 +39,19 @@ type userResponse struct {
 	Occupation 	string 	`json:"occupation"`
 	Email 		string 	`json:"email"`
 	Token 		string 	`json:"token"`
+	ImageURL	string	`json:"image_url"`
 }
 
 func UserResponse(user User, token string) userResponse {
+	appUrl := os.Getenv("APP_URL")
+
 	formatter := userResponse{
 		ID: user.ID,
 		Name: user.Name,
 		Occupation: user.Occupation,
 		Email: user.Email,
 		Token: token,
+		ImageURL: appUrl + user.AvatarFileName,
 	}
 
 	return formatter
