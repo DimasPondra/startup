@@ -48,6 +48,7 @@ func main() {
 	api.POST("/users/avatar", middlewares.AuthMiddleware(authService, userService), userController.UploadAvatar)
 
 	api.GET("/campaigns", campaignController.Index)
+	api.GET("/campaigns/:slug/show", campaignController.Show)
 
 	router.Run()
 }

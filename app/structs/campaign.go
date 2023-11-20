@@ -2,6 +2,7 @@ package structs
 
 import (
 	"os"
+	"strings"
 	"time"
 )
 
@@ -41,6 +42,17 @@ type listCampaignResponse struct {
 	ImageURL 		 *string 	`json:"image_url"`
 }
 
+type campaignResponse struct {
+	ID 				int 		`json:"id"`
+	Name 			string 		`json:"name"`
+	Description 	string		`json:"description"`
+	GoalAmount 		int 		`json:"goal_amount"`
+	CurrentAmount 	int 		`json:"current_amount"`
+	Perks 			[]string 	`json:"perks"`
+	BackerCount 	int 		`json:"backer_count"`
+	Images 			[]string 	`json:"images"`
+}
+
 func CampaignResponses(campaigns []Campaign) []listCampaignResponse {
 	listCampaigns := []listCampaignResponse{}
 
@@ -63,6 +75,30 @@ func CampaignResponses(campaigns []Campaign) []listCampaignResponse {
 	return listCampaigns
 }
 
+func CampaignResponse(campaign Campaign) campaignResponse {
+	appUrl := os.Getenv("APP_URL")
+	images := []string{}
+
+	for _, image := range campaign.CampaignImages {
+		getFileName := appUrl + image.FileName
+
+		images = append(images, getFileName)
+	}
+
+	campaignFormatter := campaignResponse{
+		ID: campaign.ID,
+		Name: campaign.Name,
+		Description: campaign.Description,
+		GoalAmount: campaign.GoalAmount,
+		CurrentAmount: campaign.CurrentAmount,
+		Perks: splitPerks(campaign.Perks),
+		BackerCount: campaign.BackerCount,
+		Images: images,
+	}
+
+	return campaignFormatter
+}
+
 func getImageUrl(campaignImages []CampaignImage) *string {
 	appUrl := os.Getenv("APP_URL")
 
@@ -72,4 +108,10 @@ func getImageUrl(campaignImages []CampaignImage) *string {
 	}
 
 	return nil
+}
+
+func splitPerks(perks string) []string {
+	splitOfPerks := strings.Split(perks, ", ")
+
+	return splitOfPerks
 }

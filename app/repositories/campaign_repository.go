@@ -9,6 +9,7 @@ import (
 type CampaignRepository interface {
 	FindAll() ([]structs.Campaign, error)
 	FindByUserID(userID int) ([]structs.Campaign, error)
+	FindBySlug(slug string) (structs.Campaign, error)
 }
 
 type campaignRepository struct {
@@ -41,4 +42,15 @@ func (r *campaignRepository) FindByUserID(userID int) ([]structs.Campaign, error
 	}
 
 	return campaigns, nil
+}
+
+func (r *campaignRepository) FindBySlug(slug string) (structs.Campaign, error) {
+	var campaign structs.Campaign
+
+	err := r.db.Where("slug = ?", slug).Preload("CampaignImages").First(&campaign).Error
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
 }

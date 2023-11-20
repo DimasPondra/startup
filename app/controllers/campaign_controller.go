@@ -33,3 +33,21 @@ func (h *campaignController) Index(c *gin.Context) {
 	res := helpers.ResponseAPI("List of campaigns", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
+
+func (h *campaignController) Show(c *gin.Context) {
+	slug := c.Param("slug")
+
+	campaign, err := h.campaignService.GetCampaignBySlug(slug)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		res := helpers.ResponseAPI("Campaign not found.", http.StatusNotFound, "error", errorMessage)
+		c.JSON(http.StatusNotFound, res)
+		return
+	}
+
+	formatter := structs.CampaignResponse(campaign)
+
+	res := helpers.ResponseAPI("Detail campaign.", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, res)
+}

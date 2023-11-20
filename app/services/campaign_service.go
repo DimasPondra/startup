@@ -7,6 +7,7 @@ import (
 
 type CampaignService interface {
 	GetCampaigns(userID int) ([]structs.Campaign, error)
+	GetCampaignBySlug(slug string) (structs.Campaign, error)
 }
 
 type campaignService struct {
@@ -33,4 +34,14 @@ func (s *campaignService) GetCampaigns(userID int) ([]structs.Campaign, error) {
 	}
 
 	return campaigns, nil
+}
+
+func (s *campaignService) GetCampaignBySlug(slug string) (structs.Campaign, error) {
+	campaign, err := s.campaignRepo.FindBySlug(slug)
+
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
 }
