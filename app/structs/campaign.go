@@ -15,6 +15,7 @@ type Campaign struct {
 	CreatedAt        time.Time
 	UpdatedAt 		 time.Time
 	UserID 			 int
+	CampaignImages 	 []CampaignImage
 }
 
 type CampaignImage struct {
