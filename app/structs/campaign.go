@@ -42,11 +42,7 @@ type listCampaignResponse struct {
 }
 
 func CampaignResponses(campaigns []Campaign) []listCampaignResponse {
-	var listCampaigns []listCampaignResponse
-
-	if len(campaigns) == 0 {
-		return []listCampaignResponse{}
-	}
+	listCampaigns := []listCampaignResponse{}
 
 	for _, campaign := range campaigns {
 		
