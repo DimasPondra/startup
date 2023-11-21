@@ -47,7 +47,7 @@ func (r *campaignRepository) FindByUserID(userID int) ([]structs.Campaign, error
 func (r *campaignRepository) FindBySlug(slug string) (structs.Campaign, error) {
 	var campaign structs.Campaign
 
-	err := r.db.Where("slug = ?", slug).Preload("CampaignImages").First(&campaign).Error
+	err := r.db.Where("slug = ?", slug).Preload("CampaignImages").Preload("User").First(&campaign).Error
 	if err != nil {
 		return campaign, err
 	}

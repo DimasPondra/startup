@@ -18,7 +18,8 @@ type Campaign struct {
 	BackerCount      int
 	CreatedAt        time.Time
 	UpdatedAt 		 time.Time
-	UserID 			 int
+	UserID			 int
+	User 			 User
 	CampaignImages 	 []CampaignImage
 }
 
@@ -43,14 +44,26 @@ type listCampaignResponse struct {
 }
 
 type campaignResponse struct {
-	ID 				int 		`json:"id"`
-	Name 			string 		`json:"name"`
-	Description 	string		`json:"description"`
-	GoalAmount 		int 		`json:"goal_amount"`
-	CurrentAmount 	int 		`json:"current_amount"`
-	Perks 			[]string 	`json:"perks"`
-	BackerCount 	int 		`json:"backer_count"`
-	Images 			[]string 	`json:"images"`
+	ID 					int 					`json:"id"`
+	Name 				string 					`json:"name"`
+	ShortDescription 	string					`json:"short_description"`
+	Description 		string					`json:"description"`
+	GoalAmount 			int 					`json:"goal_amount"`
+	CurrentAmount 		int 					`json:"current_amount"`
+	Perks 				[]string 				`json:"perks"`
+	BackerCount 		int 					`json:"backer_count"`
+	User 				campaignUserResponse	`json:"user"`
+	Images 				[]campaignImageResponse `json:"images"`
+}
+
+type campaignUserResponse struct {
+	Name		string	`json:"name"`
+	ImageURL	string	`json:"image_url"`
+}
+
+type campaignImageResponse struct {
+	ImageURL	string	`json:"image_url"`
+	IsPrimary	bool	`json:"is_primary"`
 }
 
 func CampaignResponses(campaigns []Campaign) []listCampaignResponse {
@@ -77,22 +90,34 @@ func CampaignResponses(campaigns []Campaign) []listCampaignResponse {
 
 func CampaignResponse(campaign Campaign) campaignResponse {
 	appUrl := os.Getenv("APP_URL")
-	images := []string{}
+	images := []campaignImageResponse{}
+
+	user := campaignUserResponse{
+		Name: campaign.User.Name,
+		ImageURL: appUrl + campaign.User.AvatarFileName,
+	}
 
 	for _, image := range campaign.CampaignImages {
-		getFileName := appUrl + image.FileName
+		isPrimary := image.IsPrimary != 0
 
-		images = append(images, getFileName)
+		campaignImage := campaignImageResponse{
+			ImageURL: appUrl + image.FileName,
+			IsPrimary: isPrimary,
+		}
+
+		images = append(images, campaignImage)
 	}
 
 	campaignFormatter := campaignResponse{
 		ID: campaign.ID,
 		Name: campaign.Name,
+		ShortDescription: campaign.ShortDescription,
 		Description: campaign.Description,
 		GoalAmount: campaign.GoalAmount,
 		CurrentAmount: campaign.CurrentAmount,
 		Perks: splitPerks(campaign.Perks),
 		BackerCount: campaign.BackerCount,
+		User: user,
 		Images: images,
 	}
 
