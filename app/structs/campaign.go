@@ -32,6 +32,15 @@ type CampaignImage struct {
 	CampaignID 	int
 }
 
+type CampaignStoreRequest struct {
+	Name 				string 		`json:"name" binding:"required"`
+	ShortDescription 	string 		`json:"short_description" binding:"required"`
+	Description 		string 		`json:"description" binding:"required"`
+	GoalAmount 			int 		`json:"goal_amount" binding:"required,number,gt=0"`
+	CurrentAmount 		int			`json:"current_amount" binding:"required,number,gt=0"`
+	Perks 				string 		`json:"perks" binding:"required"`
+}
+
 type listCampaignResponse struct {
 	ID 				 int 		`json:"id"`
 	Name 			 string 	`json:"name"`

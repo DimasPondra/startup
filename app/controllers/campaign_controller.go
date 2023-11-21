@@ -51,3 +51,26 @@ func (h *campaignController) Show(c *gin.Context) {
 	res := helpers.ResponseAPI("Detail campaign.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
+
+func (h *campaignController) Store(c *gin.Context) {
+	var request structs.CampaignStoreRequest
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		res := helpers.ResponseAPI("Something went wrong.", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
+	campaign, _ := h.campaignService.GetCampaignByName(request.Name)
+	if campaign.ID != 0 {
+		errorMessage := gin.H{"errors": "Nama sudah ada."}
+
+		res := helpers.ResponseAPI("Something went wrong.", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+}

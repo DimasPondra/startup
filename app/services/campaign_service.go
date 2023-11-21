@@ -8,6 +8,8 @@ import (
 type CampaignService interface {
 	GetCampaigns(userID int) ([]structs.Campaign, error)
 	GetCampaignBySlug(slug string) (structs.Campaign, error)
+	CreateCampaign(campaign structs.Campaign) (structs.Campaign, error)
+	GetCampaignByName(name string) (structs.Campaign, error)
 }
 
 type campaignService struct {
@@ -38,6 +40,26 @@ func (s *campaignService) GetCampaigns(userID int) ([]structs.Campaign, error) {
 
 func (s *campaignService) GetCampaignBySlug(slug string) (structs.Campaign, error) {
 	campaign, err := s.campaignRepo.FindBySlug(slug)
+
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
+}
+
+func (s *campaignService) CreateCampaign(campaign structs.Campaign) (structs.Campaign, error) {
+	newCampaign, err := s.campaignRepo.Create(campaign)
+
+	if err != nil {
+		return newCampaign, err
+	}
+
+	return newCampaign, nil
+}
+
+func (s *campaignService) GetCampaignByName(name string) (structs.Campaign, error) {
+	campaign, err := s.campaignRepo.FindCampaignByName(name)
 
 	if err != nil {
 		return campaign, err

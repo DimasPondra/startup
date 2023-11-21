@@ -10,6 +10,8 @@ type CampaignRepository interface {
 	FindAll() ([]structs.Campaign, error)
 	FindByUserID(userID int) ([]structs.Campaign, error)
 	FindBySlug(slug string) (structs.Campaign, error)
+	FindCampaignByName(name string) (structs.Campaign, error)
+	Create(campaign structs.Campaign) (structs.Campaign, error)
 }
 
 type campaignRepository struct {
@@ -48,6 +50,28 @@ func (r *campaignRepository) FindBySlug(slug string) (structs.Campaign, error) {
 	var campaign structs.Campaign
 
 	err := r.db.Where("slug = ?", slug).Preload("CampaignImages").Preload("User").First(&campaign).Error
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
+}
+
+func (r *campaignRepository) Create(campaign structs.Campaign) (structs.Campaign, error) {
+	err := r.db.Create(&campaign).Error
+
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
+}
+
+func (r *campaignRepository) FindCampaignByName(name string) (structs.Campaign, error) {
+	var campaign structs.Campaign
+
+	err := r.db.Where("name = ?", name).First(&campaign).Error
+
 	if err != nil {
 		return campaign, err
 	}

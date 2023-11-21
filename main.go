@@ -49,6 +49,7 @@ func main() {
 
 	api.GET("/campaigns", campaignController.Index)
 	api.GET("/campaigns/:slug/show", campaignController.Show)
+	api.POST("/campaigns/store", middlewares.AuthMiddleware(authService, userService), campaignController.Store)
 
 	router.Run()
 }
