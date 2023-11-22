@@ -60,17 +60,33 @@ func (h *campaignController) Store(c *gin.Context) {
 		errors := helpers.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
 
-		res := helpers.ResponseAPI("Something went wrong.", http.StatusUnprocessableEntity, "error", errorMessage)
+		res := helpers.ResponseAPI("Failed to create a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
 
 	campaign, _ := h.campaignService.GetCampaignByName(request.Name)
 	if campaign.ID != 0 {
-		errorMessage := gin.H{"errors": "Nama sudah ada."}
+		errorMessage := gin.H{"errors": "Name is already in use."}
 
-		res := helpers.ResponseAPI("Something went wrong.", http.StatusUnprocessableEntity, "error", errorMessage)
+		res := helpers.ResponseAPI("Failed to create a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
+
+	user := c.MustGet("currentUser").(structs.User)
+	newCampaign, err := h.campaignService.CreateCampaign(request, user)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	getCampaign, _ := h.campaignService.GetCampaignBySlug(newCampaign.Slug)
+
+	formatter := structs.CampaignResponse(getCampaign)
+	res := helpers.ResponseAPI("Campaign successfully created.", http.StatusOK, "sucess", formatter)
+	c.JSON(http.StatusOK, res)
 }

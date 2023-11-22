@@ -3,12 +3,14 @@ package services
 import (
 	"startup/app/repositories"
 	"startup/app/structs"
+
+	"github.com/gosimple/slug"
 )
 
 type CampaignService interface {
 	GetCampaigns(userID int) ([]structs.Campaign, error)
 	GetCampaignBySlug(slug string) (structs.Campaign, error)
-	CreateCampaign(campaign structs.Campaign) (structs.Campaign, error)
+	CreateCampaign(request structs.CampaignStoreRequest, user structs.User) (structs.Campaign, error)
 	GetCampaignByName(name string) (structs.Campaign, error)
 }
 
@@ -48,7 +50,21 @@ func (s *campaignService) GetCampaignBySlug(slug string) (structs.Campaign, erro
 	return campaign, nil
 }
 
-func (s *campaignService) CreateCampaign(campaign structs.Campaign) (structs.Campaign, error) {
+func (s *campaignService) CreateCampaign(request structs.CampaignStoreRequest, user structs.User) (structs.Campaign, error) {
+	slug := slug.Make(request.Name)
+	
+	campaign := structs.Campaign{
+		Name: request.Name,
+		Slug: slug,
+		ShortDescription: request.ShortDescription,
+		Description: request.Description,
+		GoalAmount: request.GoalAmount,
+		CurrentAmount: request.CurrentAmount,
+		Perks: request.Perks,
+		BackerCount: 0,
+		UserID: user.ID,
+	}
+
 	newCampaign, err := s.campaignRepo.Create(campaign)
 
 	if err != nil {
