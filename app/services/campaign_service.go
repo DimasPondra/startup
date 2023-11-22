@@ -10,7 +10,7 @@ import (
 type CampaignService interface {
 	GetCampaigns(userID int) ([]structs.Campaign, error)
 	GetCampaignBySlug(slug string) (structs.Campaign, error)
-	CreateCampaign(request structs.CampaignStoreRequest, user structs.User) (structs.Campaign, error)
+	CreateCampaign(request structs.CampaignStoreRequest) (structs.Campaign, error)
 	GetCampaignByName(name string) (structs.Campaign, error)
 }
 
@@ -50,7 +50,7 @@ func (s *campaignService) GetCampaignBySlug(slug string) (structs.Campaign, erro
 	return campaign, nil
 }
 
-func (s *campaignService) CreateCampaign(request structs.CampaignStoreRequest, user structs.User) (structs.Campaign, error) {
+func (s *campaignService) CreateCampaign(request structs.CampaignStoreRequest) (structs.Campaign, error) {
 	slug := slug.Make(request.Name)
 	
 	campaign := structs.Campaign{
@@ -59,10 +59,10 @@ func (s *campaignService) CreateCampaign(request structs.CampaignStoreRequest, u
 		ShortDescription: request.ShortDescription,
 		Description: request.Description,
 		GoalAmount: request.GoalAmount,
-		CurrentAmount: request.CurrentAmount,
+		CurrentAmount: 0,
 		Perks: request.Perks,
 		BackerCount: 0,
-		UserID: user.ID,
+		UserID: request.User.ID,
 	}
 
 	newCampaign, err := s.campaignRepo.Create(campaign)

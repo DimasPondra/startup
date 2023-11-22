@@ -75,7 +75,8 @@ func (h *campaignController) Store(c *gin.Context) {
 	}
 
 	user := c.MustGet("currentUser").(structs.User)
-	newCampaign, err := h.campaignService.CreateCampaign(request, user)
+	request.User = user
+	newCampaign, err := h.campaignService.CreateCampaign(request)
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
 
@@ -84,9 +85,7 @@ func (h *campaignController) Store(c *gin.Context) {
 		return
 	}
 
-	getCampaign, _ := h.campaignService.GetCampaignBySlug(newCampaign.Slug)
-
-	formatter := structs.CampaignResponse(getCampaign)
+	formatter := structs.CampaignStoreResponse(newCampaign)
 	res := helpers.ResponseAPI("Campaign successfully created.", http.StatusOK, "sucess", formatter)
 	c.JSON(http.StatusOK, res)
 }

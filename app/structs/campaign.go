@@ -37,8 +37,8 @@ type CampaignStoreRequest struct {
 	ShortDescription 	string 		`json:"short_description" binding:"required"`
 	Description 		string 		`json:"description" binding:"required"`
 	GoalAmount 			int 		`json:"goal_amount" binding:"required,number,gt=0"`
-	CurrentAmount 		int			`json:"current_amount" binding:"required,number,gt=0"`
 	Perks 				string 		`json:"perks" binding:"required"`
+	User          	 	User
 }
 
 type listCampaignResponse struct {
@@ -131,6 +131,21 @@ func CampaignResponse(campaign Campaign) campaignResponse {
 	}
 
 	return campaignFormatter
+}
+
+func CampaignStoreResponse(campaign Campaign) listCampaignResponse {
+	formatter := listCampaignResponse{
+		ID: campaign.ID,
+		Name: campaign.Name,
+		Slug: campaign.Slug,
+		ShortDescription: campaign.ShortDescription,
+		GoalAmount: campaign.GoalAmount,
+		CurrentAmount: campaign.CurrentAmount,
+		UserID: campaign.UserID,
+		ImageURL: getImageUrl(campaign.CampaignImages),
+	}
+
+	return formatter
 }
 
 func getImageUrl(campaignImages []CampaignImage) *string {
