@@ -12,6 +12,7 @@ type CampaignService interface {
 	GetCampaignBySlug(slug string) (structs.Campaign, error)
 	CreateCampaign(request structs.CampaignStoreRequest) (structs.Campaign, error)
 	GetCampaignByName(name string) (structs.Campaign, error)
+	UpdateCampaign(request structs.CampaignUpdateRequest, campaign structs.Campaign) (structs.Campaign, error)
 }
 
 type campaignService struct {
@@ -82,4 +83,23 @@ func (s *campaignService) GetCampaignByName(name string) (structs.Campaign, erro
 	}
 
 	return campaign, nil
+}
+
+func (s *campaignService) UpdateCampaign(request structs.CampaignUpdateRequest, campaign structs.Campaign) (structs.Campaign, error) {
+	slug := slug.Make(request.Name)
+	
+	campaign.Name = request.Name
+	campaign.Slug = slug
+	campaign.ShortDescription = request.ShortDescription
+	campaign.Description = request.Description
+	campaign.GoalAmount = request.GoalAmount
+	campaign.Perks = request.Perks
+
+	newCampaign, err := s.campaignRepo.Update(campaign)
+
+	if err != nil {
+		return newCampaign, err
+	}
+
+	return newCampaign, nil
 }

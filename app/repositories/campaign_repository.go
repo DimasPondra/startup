@@ -12,6 +12,7 @@ type CampaignRepository interface {
 	FindBySlug(slug string) (structs.Campaign, error)
 	FindCampaignByName(name string) (structs.Campaign, error)
 	Create(campaign structs.Campaign) (structs.Campaign, error)
+	Update(campaign structs.Campaign) (structs.Campaign, error)
 }
 
 type campaignRepository struct {
@@ -71,6 +72,16 @@ func (r *campaignRepository) FindCampaignByName(name string) (structs.Campaign, 
 	var campaign structs.Campaign
 
 	err := r.db.Where("name = ?", name).First(&campaign).Error
+
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
+}
+
+func (r *campaignRepository) Update(campaign structs.Campaign) (structs.Campaign, error) {
+	err := r.db.Save(&campaign).Error
 
 	if err != nil {
 		return campaign, err
