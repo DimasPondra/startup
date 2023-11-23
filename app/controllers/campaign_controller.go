@@ -12,10 +12,11 @@ import (
 
 type campaignController struct {
 	campaignService services.CampaignService
+	campaignImageService services.CampaignImageService
 }
 
-func NewCampaignController(campaignService services.CampaignService) *campaignController {
-	return &campaignController{campaignService}
+func NewCampaignController(campaignService services.CampaignService, campaignImageService services.CampaignImageService) *campaignController {
+	return &campaignController{campaignService, campaignImageService}
 }
 
 func (h *campaignController) Index(c *gin.Context) {
@@ -139,5 +140,70 @@ func (h *campaignController) Update(c *gin.Context) {
 	}
 
 	res := helpers.ResponseAPI("Campaign successfully updated.", http.StatusOK, "sucess", nil)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *campaignController) UploadImages(c *gin.Context) {
+	campaign, err := h.campaignService.GetCampaignBySlug(c.Param("slug"))
+	if err != nil {
+		res := helpers.ResponseAPI("Campaign Not Found", http.StatusNotFound, "error", nil)
+		c.JSON(http.StatusNotFound, res)
+		return
+	}
+
+	user := c.MustGet("currentUser").(structs.User)
+	if user.ID != campaign.UserID {
+		res := helpers.ResponseAPI("Can't access this data.", http.StatusForbidden, "error", nil)
+		c.JSON(http.StatusForbidden, res)
+		return
+	}
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		errorMessage := gin.H{"errors": "files is required."}
+		res := helpers.ResponseAPI("Failed to upload images.", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
+	files := form.File["files[]"]
+
+	if len(files) == 0 {
+		errorMessage := gin.H{"errors": "files is required."}
+		res := helpers.ResponseAPI("Failed to upload images.", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
+	for index, file := range files {
+		var primary bool
+
+		if index == 0 {
+			primary = true
+		} else {
+			primary = false
+		}
+
+		filename := helpers.GenerateRandomFileName(file.Filename)
+		path := "images/campaigns/" + filename
+		
+		err := c.SaveUploadedFile(file, path)
+		if err != nil {
+			data := gin.H{"is_uploaded": false}
+			res := helpers.ResponseAPI("Failed to upload images.", http.StatusBadRequest, "error", data)
+			c.JSON(http.StatusBadRequest, res)
+			return
+		}
+
+		_, err = h.campaignImageService.SaveImage(path, primary, campaign)
+		if err != nil {
+			errorMessage := gin.H{"errors": err.Error()}
+			res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+			c.JSON(http.StatusInternalServerError, res)
+			return
+		}
+	}
+
+	res := helpers.ResponseAPI("Campaign image successfully uploaded.", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, res)
 }

@@ -28,13 +28,15 @@ func main() {
 
 	userRepo := repositories.NewUserRepository(db)
 	campaignRepo := repositories.NewCampaignRepository(db)
+	campaignImageRepo := repositories.NewCampaignImageRepository(db)
 
 	userService := services.NewUserService(userRepo)
 	authService := services.NewAuthService()
 	campaignService := services.NewCampaignSevice(campaignRepo)
+	campaignImageService := services.NewCampaignImageService(campaignImageRepo)
 
 	userController := controllers.NewUserController(userService, authService)
-	campaignController := controllers.NewCampaignController(campaignService)
+	campaignController := controllers.NewCampaignController(campaignService, campaignImageService)
 
 	router := gin.Default()
 	router.Static("/images", "./images")
@@ -51,6 +53,7 @@ func main() {
 	api.GET("/campaigns/:slug/show", campaignController.Show)
 	api.POST("/campaigns/store", middlewares.AuthMiddleware(authService, userService), campaignController.Store)
 	api.PATCH("/campaigns/:slug/update", middlewares.AuthMiddleware(authService, userService), campaignController.Update)
+	api.POST("/campaigns/:slug/upload-images", middlewares.AuthMiddleware(authService, userService), campaignController.UploadImages)
 
 	router.Run()
 }
