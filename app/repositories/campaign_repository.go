@@ -8,8 +8,8 @@ import (
 
 type CampaignRepository interface {
 	FindAll() ([]structs.Campaign, error)
-	FindByUserID(userID int) ([]structs.Campaign, error)
-	FindBySlug(slug string) (structs.Campaign, error)
+	FindCampaignsByUserID(userID int) ([]structs.Campaign, error)
+	FindCampaignBySlug(slug string) (structs.Campaign, error)
 	FindCampaignByName(name string) (structs.Campaign, error)
 	Create(campaign structs.Campaign) (structs.Campaign, error)
 	Update(campaign structs.Campaign) (structs.Campaign, error)
@@ -35,7 +35,7 @@ func (r *campaignRepository) FindAll() ([]structs.Campaign, error) {
 	return campaigns, nil
 }
 
-func (r *campaignRepository) FindByUserID(userID int) ([]structs.Campaign, error) {
+func (r *campaignRepository) FindCampaignsByUserID(userID int) ([]structs.Campaign, error) {
 	var campaigns []structs.Campaign
 
 	err := r.db.Where("user_id = ?", userID).Preload("CampaignImages", "is_primary = 1").Find(&campaigns).Error
@@ -47,7 +47,7 @@ func (r *campaignRepository) FindByUserID(userID int) ([]structs.Campaign, error
 	return campaigns, nil
 }
 
-func (r *campaignRepository) FindBySlug(slug string) (structs.Campaign, error) {
+func (r *campaignRepository) FindCampaignBySlug(slug string) (structs.Campaign, error) {
 	var campaign structs.Campaign
 
 	err := r.db.Where("slug = ?", slug).Preload("CampaignImages").Preload("User").First(&campaign).Error

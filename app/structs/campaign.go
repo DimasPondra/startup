@@ -7,29 +7,20 @@ import (
 )
 
 type Campaign struct {
-	ID               int
-	Name             string
-	Slug             string
-	ShortDescription string
-	Description      string
-	GoalAmount       int
-	CurrentAmount    int
-	Perks            string
-	BackerCount      int
-	CreatedAt        time.Time
-	UpdatedAt 		 time.Time
-	UserID			 int
-	User 			 User
-	CampaignImages 	 []CampaignImage
-}
-
-type CampaignImage struct {
-	ID 			int
-	FileName 	string
-	IsPrimary 	int
-	CreatedAt   time.Time
-	UpdatedAt 	time.Time
-	CampaignID 	int
+	ID               	int
+	Name             	string
+	Slug             	string
+	ShortDescription 	string
+	Description      	string
+	GoalAmount       	int
+	CurrentAmount    	int
+	Perks            	string
+	BackerCount      	int
+	CreatedAt        	time.Time
+	UpdatedAt 		 	time.Time
+	UserID			 	int
+	User				User
+	CampaignImages		[]CampaignImage
 }
 
 type CampaignStoreRequest struct {
@@ -49,18 +40,17 @@ type CampaignUpdateRequest struct {
 	Perks 				string 		`json:"perks" binding:"required"`
 }
 
-type listCampaignResponse struct {
-	ID 				 int 		`json:"id"`
-	Name 			 string 	`json:"name"`
-	Slug 			 string 	`json:"slug"`
-	ShortDescription string 	`json:"short_description"`
-	GoalAmount		 int		`json:"goal_amount"`
-	CurrentAmount	 int		`json:"current_amount"`
-	UserID			 int		`json:"user_id"`
-	ImageURL 		 *string 	`json:"image_url"`
+type campaignResponse struct {
+	ID 				 	int 		`json:"id"`
+	Name 			 	string 		`json:"name"`
+	Slug 			 	string 		`json:"slug"`
+	ShortDescription 	string 		`json:"short_description"`
+	GoalAmount		 	int			`json:"goal_amount"`
+	CurrentAmount	 	int			`json:"current_amount"`
+	ImageURL			*string		`json:"image_url"`
 }
 
-type campaignResponse struct {
+type detailCampaignResponse struct {
 	ID 					int 					`json:"id"`
 	Name 				string 					`json:"name"`
 	ShortDescription 	string					`json:"short_description"`
@@ -70,7 +60,7 @@ type campaignResponse struct {
 	Perks 				[]string 				`json:"perks"`
 	BackerCount 		int 					`json:"backer_count"`
 	User 				campaignUserResponse	`json:"user"`
-	Images 				[]campaignImageResponse `json:"images"`
+	Images 				[]campaignImageResponse	`json:"images"`
 }
 
 type campaignUserResponse struct {
@@ -79,33 +69,38 @@ type campaignUserResponse struct {
 }
 
 type campaignImageResponse struct {
-	ImageURL	string	`json:"image_url"`
+	ImageURL	string	`json:"url"`
 	IsPrimary	bool	`json:"is_primary"`
 }
 
-func CampaignResponses(campaigns []Campaign) []listCampaignResponse {
-	listCampaigns := []listCampaignResponse{}
+func response(campaign Campaign) campaignResponse {
+	image_url := getImageUrl(campaign.CampaignImages)
+	
+	formatter := campaignResponse{
+		ID: campaign.ID,
+		Name: campaign.Name,
+		Slug: campaign.Slug,
+		ShortDescription: campaign.ShortDescription,
+		GoalAmount: campaign.GoalAmount,
+		CurrentAmount: campaign.CurrentAmount,
+		ImageURL: image_url,
+	}
+
+	return formatter
+}
+
+func ResponseCampaigns(campaigns []Campaign) []campaignResponse {
+	listCampaigns := []campaignResponse{}
 
 	for _, campaign := range campaigns {
-		
-		campaignFormatter := listCampaignResponse{
-			ID: campaign.ID,
-			Name: campaign.Name,
-			Slug: campaign.Slug,
-			ShortDescription: campaign.ShortDescription,
-			GoalAmount: campaign.GoalAmount,
-			CurrentAmount: campaign.CurrentAmount,
-			UserID: campaign.UserID,
-			ImageURL: getImageUrl(campaign.CampaignImages),
-		}
-
+		campaignFormatter := response(campaign)
 		listCampaigns = append(listCampaigns, campaignFormatter) 
 	}
 
 	return listCampaigns
 }
 
-func CampaignResponse(campaign Campaign) campaignResponse {
+func ResponseCampaign(campaign Campaign) detailCampaignResponse {
 	appUrl := os.Getenv("APP_URL")
 	images := []campaignImageResponse{}
 
@@ -125,7 +120,7 @@ func CampaignResponse(campaign Campaign) campaignResponse {
 		images = append(images, campaignImage)
 	}
 
-	campaignFormatter := campaignResponse{
+	campaignFormatter := detailCampaignResponse{
 		ID: campaign.ID,
 		Name: campaign.Name,
 		ShortDescription: campaign.ShortDescription,
@@ -139,21 +134,6 @@ func CampaignResponse(campaign Campaign) campaignResponse {
 	}
 
 	return campaignFormatter
-}
-
-func CampaignStoreResponse(campaign Campaign) listCampaignResponse {
-	formatter := listCampaignResponse{
-		ID: campaign.ID,
-		Name: campaign.Name,
-		Slug: campaign.Slug,
-		ShortDescription: campaign.ShortDescription,
-		GoalAmount: campaign.GoalAmount,
-		CurrentAmount: campaign.CurrentAmount,
-		UserID: campaign.UserID,
-		ImageURL: getImageUrl(campaign.CampaignImages),
-	}
-
-	return formatter
 }
 
 func getImageUrl(campaignImages []CampaignImage) *string {

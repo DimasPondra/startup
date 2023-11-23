@@ -28,7 +28,7 @@ func (h *campaignController) Index(c *gin.Context) {
 		return
 	}
 
-	formatter := structs.CampaignResponses(campaigns)
+	formatter := structs.ResponseCampaigns(campaigns)
 
 	res := helpers.ResponseAPI("List of campaigns", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
@@ -46,7 +46,7 @@ func (h *campaignController) Show(c *gin.Context) {
 		return
 	}
 
-	formatter := structs.CampaignResponse(campaign)
+	formatter := structs.ResponseCampaign(campaign)
 
 	res := helpers.ResponseAPI("Detail campaign.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
@@ -76,7 +76,7 @@ func (h *campaignController) Store(c *gin.Context) {
 
 	user := c.MustGet("currentUser").(structs.User)
 	request.User = user
-	newCampaign, err := h.campaignService.CreateCampaign(request)
+	_, err = h.campaignService.CreateCampaign(request)
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
 
@@ -85,8 +85,7 @@ func (h *campaignController) Store(c *gin.Context) {
 		return
 	}
 
-	formatter := structs.CampaignStoreResponse(newCampaign)
-	res := helpers.ResponseAPI("Campaign successfully created.", http.StatusOK, "sucess", formatter)
+	res := helpers.ResponseAPI("Campaign successfully created.", http.StatusOK, "sucess", nil)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -130,7 +129,7 @@ func (h *campaignController) Update(c *gin.Context) {
 		}
 	}
 
-	newCampaign, err := h.campaignService.UpdateCampaign(request, campaign)
+	_, err = h.campaignService.UpdateCampaign(request, campaign)
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
 
@@ -139,7 +138,6 @@ func (h *campaignController) Update(c *gin.Context) {
 		return
 	}
 
-	formatter := structs.CampaignStoreResponse(newCampaign)
-	res := helpers.ResponseAPI("Campaign successfully updated.", http.StatusOK, "sucess", formatter)
+	res := helpers.ResponseAPI("Campaign successfully updated.", http.StatusOK, "sucess", nil)
 	c.JSON(http.StatusOK, res)
 }

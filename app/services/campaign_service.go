@@ -25,7 +25,7 @@ func NewCampaignSevice(campaignRepo repositories.CampaignRepository) *campaignSe
 
 func (s *campaignService) GetCampaigns(userID int) ([]structs.Campaign, error) {
 	if userID != 0 {
-		campaigns, err := s.campaignRepo.FindByUserID(userID)
+		campaigns, err := s.campaignRepo.FindCampaignsByUserID(userID)
 		if err != nil {
 			return campaigns, err
 		}
@@ -42,7 +42,7 @@ func (s *campaignService) GetCampaigns(userID int) ([]structs.Campaign, error) {
 }
 
 func (s *campaignService) GetCampaignBySlug(slug string) (structs.Campaign, error) {
-	campaign, err := s.campaignRepo.FindBySlug(slug)
+	campaign, err := s.campaignRepo.FindCampaignBySlug(slug)
 
 	if err != nil {
 		return campaign, err
