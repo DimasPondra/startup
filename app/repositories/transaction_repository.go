@@ -22,7 +22,7 @@ func NewTransactionRepository(db *gorm.DB) *transactionRepository {
 func (r *transactionRepository) FindAll() ([]structs.Transaction, error) {
 	var transactions []structs.Transaction
 
-	err := r.db.Find(&transactions).Error
+	err := r.db.Preload("Campaign.CampaignImages", "is_primary = 1").Preload("User").Find(&transactions).Error
 
 	if err != nil {
 		return transactions, err
@@ -34,7 +34,7 @@ func (r *transactionRepository) FindAll() ([]structs.Transaction, error) {
 func (r *transactionRepository) FindTransactionsByUserID(userID int) ([]structs.Transaction, error) {
 	var transactions []structs.Transaction
 
-	err := r.db.Where("user_id = ?", userID).Find(&transactions).Error
+	err := r.db.Where("user_id = ?", userID).Preload("Campaign.CampaignImages", "is_primary = 1").Preload("User").Find(&transactions).Error
 
 	if err != nil {
 		return transactions, err

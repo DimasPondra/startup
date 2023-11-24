@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"startup/app/helpers"
 	"startup/app/services"
+	"startup/app/structs"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -27,6 +28,7 @@ func (h *transactionController) Index(c *gin.Context) {
 		return
 	}
 
-	res := helpers.ResponseAPI("List of transactions.", http.StatusOK, "success", transactions)
+	formatter := structs.ResponseTransactions(transactions)
+	res := helpers.ResponseAPI("List of transactions.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
