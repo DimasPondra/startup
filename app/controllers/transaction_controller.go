@@ -20,8 +20,9 @@ func NewTransactionController(transactionService services.TransactionService) *t
 
 func (h *transactionController) Index(c *gin.Context) {
 	userID, _ := strconv.Atoi(c.Query("user_id"))
+	campaignID, _ := strconv.Atoi(c.Query("campaign_id"))
 
-	transactions, err := h.transactionService.GetTransactions(userID)
+	transactions, err := h.transactionService.GetTransactions(userID, campaignID)
 	if err != nil {
 		res := helpers.ResponseAPI("Something went wrong", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)

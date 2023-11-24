@@ -22,6 +22,7 @@ type transactionResponse struct {
 	ID			int							`json:"id"`
 	Amount		int							`json:"amount"`
 	Status		string						`json:"status"`
+	CreatedAt	string						`json:"created_at"`
 	Campaign	campaignTransactionResponse	`json:"campaign"`
 	User		userTransactionResponse		`json:"user"`
 }
@@ -37,10 +38,13 @@ type userTransactionResponse struct {
 }
 
 func responseTransaction(transaction Transaction) transactionResponse {
+	createdAt := transaction.CreatedAt.Format("Monday 02, January 2006")
+
 	formatter := transactionResponse{
 		ID: transaction.ID,
 		Amount: transaction.Amount,
 		Status: transaction.Status,
+		CreatedAt: createdAt,
 	}
 
 	return formatter

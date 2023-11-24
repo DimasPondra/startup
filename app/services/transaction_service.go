@@ -6,7 +6,7 @@ import (
 )
 
 type TransactionService interface {
-	GetTransactions(userID int) ([]structs.Transaction, error)
+	GetTransactions(userID int, campaignID int) ([]structs.Transaction, error)
 }
 
 type transactionService struct {
@@ -17,9 +17,19 @@ func NewTransactionService(transactionRepo repositories.TransactionRepository) *
 	return &transactionService{transactionRepo}
 }
 
-func (s *transactionService) GetTransactions(userID int) ([]structs.Transaction, error) {
+func (s *transactionService) GetTransactions(userID int, campaignID int) ([]structs.Transaction, error) {
 	if userID != 0 {
 		transactions, err := s.transactionRepo.FindTransactionsByUserID(userID)
+
+		if err != nil {
+			return transactions, err
+		}
+
+		return transactions, nil
+	}
+
+	if campaignID != 0 {
+		transactions, err := s.transactionRepo.FindTransactionsByCampaignID(campaignID)
 
 		if err != nil {
 			return transactions, err
