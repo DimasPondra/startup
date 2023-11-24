@@ -175,14 +175,15 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 		return
 	}
 
-	for index, file := range files {
-		var primary bool
+	_, err = h.campaignImageService.DeleteImages(campaign.ID)
+	if err != nil {
+		res := helpers.ResponseAPI("Failed to delete images.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
 
-		if index == 0 {
-			primary = true
-		} else {
-			primary = false
-		}
+	for index, file := range files {
+		primary := index == 0
 
 		filename := helpers.GenerateRandomFileName(file.Filename)
 		path := "images/campaigns/" + filename
