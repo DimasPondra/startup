@@ -11,6 +11,7 @@ type CampaignRepository interface {
 	FindCampaignsByUserID(userID int) ([]structs.Campaign, error)
 	FindCampaignBySlug(slug string) (structs.Campaign, error)
 	FindCampaignByName(name string) (structs.Campaign, error)
+	FindCampaignByID(ID int) (structs.Campaign, error)
 	Create(campaign structs.Campaign) (structs.Campaign, error)
 	Update(campaign structs.Campaign) (structs.Campaign, error)
 }
@@ -58,8 +59,10 @@ func (r *campaignRepository) FindCampaignBySlug(slug string) (structs.Campaign, 
 	return campaign, nil
 }
 
-func (r *campaignRepository) Create(campaign structs.Campaign) (structs.Campaign, error) {
-	err := r.db.Create(&campaign).Error
+func (r *campaignRepository) FindCampaignByName(name string) (structs.Campaign, error) {
+	var campaign structs.Campaign
+
+	err := r.db.Where("name = ?", name).First(&campaign).Error
 
 	if err != nil {
 		return campaign, err
@@ -68,10 +71,20 @@ func (r *campaignRepository) Create(campaign structs.Campaign) (structs.Campaign
 	return campaign, nil
 }
 
-func (r *campaignRepository) FindCampaignByName(name string) (structs.Campaign, error) {
+func (r *campaignRepository) FindCampaignByID(ID int) (structs.Campaign, error) {
 	var campaign structs.Campaign
 
-	err := r.db.Where("name = ?", name).First(&campaign).Error
+	err := r.db.First(&campaign, ID).Error
+
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
+}
+
+func (r *campaignRepository) Create(campaign structs.Campaign) (structs.Campaign, error) {
+	err := r.db.Create(&campaign).Error
 
 	if err != nil {
 		return campaign, err

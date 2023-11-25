@@ -3,6 +3,7 @@ package helpers
 import (
 	"math/rand"
 	"strings"
+	"time"
 )
 
 func generateRandomString(length int) string {
@@ -26,4 +27,15 @@ func GenerateRandomFileName(filename string) string {
 
 	name := random + "." + typeFile
 	return name
+}
+
+func GenerateRandomCode() string {
+	random := generateRandomString(24)
+	time := time.Now()
+	month := time.Format("01")
+	year := time.Format("2006")
+
+	code := "INV-" + month + "-" + year + "-" + random
+
+	return code
 }

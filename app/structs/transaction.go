@@ -10,11 +10,18 @@ type Transaction struct {
 	Amount     	int
 	Status     	string
 	Code       	string
+	PaymentURL	string
 	CreatedAt	time.Time
 	UpdatedAt	time.Time
 	CampaignID 	int
 	UserID     	int
 	Campaign    Campaign
+	User		User
+}
+
+type TransactionStoreRequest struct {
+	CampaignID	int	`json:"campaign_id" binding:"required,number"`
+	Amount		int	`json:"amount" binding:"required,number,gt=0"`
 	User		User
 }
 
@@ -81,4 +88,24 @@ func ResponseTransactions(transactions []Transaction) []transactionResponse {
 	}
 
 	return listTransactions
+}
+
+type createTransactionResponse struct {
+	ID	int	`json:"id"`
+	Amount	int	`json:"amount"`
+	Status	string	`json:"status"`
+	Code	string	`json:"code"`
+	PaymentURL	string	`json:"payment_url"`
+}
+
+func CreateResponseTransaction(transaction Transaction) createTransactionResponse {
+	formatter := createTransactionResponse{
+		ID: transaction.ID,
+		Amount: transaction.Amount,
+		Status: transaction.Status,
+		Code: transaction.Code,
+		PaymentURL: transaction.PaymentURL,
+	}
+
+	return formatter
 }

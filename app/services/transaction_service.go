@@ -1,20 +1,23 @@
 package services
 
 import (
+	"startup/app/helpers"
 	"startup/app/repositories"
 	"startup/app/structs"
 )
 
 type TransactionService interface {
 	GetTransactions(userID int, campaignID int) ([]structs.Transaction, error)
+	CreateTransaction(request structs.TransactionStoreRequest) (structs.Transaction, error)
 }
 
 type transactionService struct {
 	transactionRepo repositories.TransactionRepository
+	paymentService PaymentService
 }
 
-func NewTransactionService(transactionRepo repositories.TransactionRepository) *transactionService {
-	return &transactionService{transactionRepo}
+func NewTransactionService(transactionRepo repositories.TransactionRepository, paymentService PaymentService) *transactionService {
+	return &transactionService{transactionRepo, paymentService}
 }
 
 func (s *transactionService) GetTransactions(userID int, campaignID int) ([]structs.Transaction, error) {
@@ -45,4 +48,41 @@ func (s *transactionService) GetTransactions(userID int, campaignID int) ([]stru
 	}
 
 	return transactions, nil
+}
+
+func (s *transactionService) CreateTransaction(request structs.TransactionStoreRequest) (structs.Transaction, error) {
+	code := helpers.GenerateRandomCode()
+	
+	transaction := structs.Transaction{
+		Amount: request.Amount,
+		Status: "pending",
+		Code: code,
+		CampaignID: request.CampaignID,
+		UserID: request.User.ID,
+	}
+
+	newTransaction, err := s.transactionRepo.Create(transaction)
+	if err != nil {
+		return newTransaction, err
+	}
+
+	payment := structs.PaymentStoreRequest{
+		Code: newTransaction.Code,
+		Amount: newTransaction.Amount,
+		Name: request.User.Name,
+		Email: request.User.Email,
+	}
+
+	paymentURL, err := s.paymentService.GetPaymentURL(payment)
+	if err != nil {
+		return newTransaction, err
+	}
+
+	newTransaction.PaymentURL = paymentURL
+	updatedTransaction, err := s.transactionRepo.Update(newTransaction)
+	if err != nil {
+		return updatedTransaction, err
+	}
+
+	return updatedTransaction, nil
 }

@@ -10,6 +10,8 @@ type TransactionRepository interface {
 	FindAll() ([]structs.Transaction, error)
 	FindTransactionsByUserID(userID int) ([]structs.Transaction, error)
 	FindTransactionsByCampaignID(campaignID int) ([]structs.Transaction, error)
+	Create(transaction structs.Transaction) (structs.Transaction, error)
+	Update(transaction structs.Transaction) (structs.Transaction, error)
 }
 
 type transactionRepository struct {
@@ -54,4 +56,24 @@ func (r *transactionRepository) FindTransactionsByCampaignID(campaignID int) ([]
 	}
 
 	return transactions, nil
+}
+
+func (r *transactionRepository) Create(transaction structs.Transaction) (structs.Transaction, error) {
+	err := r.db.Create(&transaction).Error
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
+}
+
+func (r *transactionRepository) Update(transaction structs.Transaction) (structs.Transaction, error) {
+	err := r.db.Save(&transaction).Error
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
 }
