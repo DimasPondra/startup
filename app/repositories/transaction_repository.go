@@ -10,6 +10,7 @@ type TransactionRepository interface {
 	FindAll() ([]structs.Transaction, error)
 	FindTransactionsByUserID(userID int) ([]structs.Transaction, error)
 	FindTransactionsByCampaignID(campaignID int) ([]structs.Transaction, error)
+	FindTransactionByCode(code string) (structs.Transaction, error)
 	Create(transaction structs.Transaction) (structs.Transaction, error)
 	Update(transaction structs.Transaction) (structs.Transaction, error)
 }
@@ -56,6 +57,18 @@ func (r *transactionRepository) FindTransactionsByCampaignID(campaignID int) ([]
 	}
 
 	return transactions, nil
+}
+
+func (r *transactionRepository) FindTransactionByCode(code string) (structs.Transaction, error) {
+	var transaction structs.Transaction
+
+	err := r.db.Where("code = ?", code).First(&transaction).Error
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
 }
 
 func (r *transactionRepository) Create(transaction structs.Transaction) (structs.Transaction, error) {

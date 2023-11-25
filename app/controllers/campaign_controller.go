@@ -130,7 +130,7 @@ func (h *campaignController) Update(c *gin.Context) {
 		}
 	}
 
-	_, err = h.campaignService.UpdateCampaign(request, campaign)
+	_, err = h.campaignService.UpdateCampaign(request, campaign, false)
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
 

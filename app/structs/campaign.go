@@ -38,6 +38,8 @@ type CampaignUpdateRequest struct {
 	Description 		string 		`json:"description" binding:"required"`
 	GoalAmount 			int 		`json:"goal_amount" binding:"required,number,gt=0"`
 	Perks 				string 		`json:"perks" binding:"required"`
+	BackerCount			int
+	CurrentAmount		int
 }
 
 type campaignResponse struct {

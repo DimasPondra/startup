@@ -13,7 +13,7 @@ type CampaignService interface {
 	GetCampaignByName(name string) (structs.Campaign, error)
 	GetCampaignByID(ID int) (structs.Campaign, error)
 	CreateCampaign(request structs.CampaignStoreRequest) (structs.Campaign, error)
-	UpdateCampaign(request structs.CampaignUpdateRequest, campaign structs.Campaign) (structs.Campaign, error)
+	UpdateCampaign(request structs.CampaignUpdateRequest, campaign structs.Campaign, status bool) (structs.Campaign, error)
 }
 
 type campaignService struct {
@@ -96,7 +96,17 @@ func (s *campaignService) CreateCampaign(request structs.CampaignStoreRequest) (
 	return newCampaign, nil
 }
 
-func (s *campaignService) UpdateCampaign(request structs.CampaignUpdateRequest, campaign structs.Campaign) (structs.Campaign, error) {
+func (s *campaignService) UpdateCampaign(request structs.CampaignUpdateRequest, campaign structs.Campaign, status bool) (structs.Campaign, error) {
+	if status {
+		newCampaign, err := s.campaignRepo.Update(campaign)
+
+		if err != nil {
+			return newCampaign, err
+		}
+
+		return newCampaign, nil
+	}
+	
 	slug := slug.Make(request.Name)
 	
 	campaign.Name = request.Name
@@ -105,6 +115,8 @@ func (s *campaignService) UpdateCampaign(request structs.CampaignUpdateRequest, 
 	campaign.Description = request.Description
 	campaign.GoalAmount = request.GoalAmount
 	campaign.Perks = request.Perks
+	// campaign.CurrentAmount = request.CurrentAmount
+	// campaign.BackerCount = request.BackerCount
 
 	newCampaign, err := s.campaignRepo.Update(campaign)
 

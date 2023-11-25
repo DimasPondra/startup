@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"startup/app/controllers"
 	"startup/app/middlewares"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"golang.ngrok.com/ngrok"
+	"golang.ngrok.com/ngrok/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -37,10 +40,12 @@ func main() {
 	campaignImageService := services.NewCampaignImageService(campaignImageRepo)
 	paymentService := services.NewPaymentService()
 	transactionService := services.NewTransactionService(transactionRepo, paymentService)
+	webhookService := services.NewWebhookService(transactionService, campaignService)
 
 	userController := controllers.NewUserController(userService, authService)
 	campaignController := controllers.NewCampaignController(campaignService, campaignImageService)
 	transactionController := controllers.NewTransactionController(transactionService, campaignService)
+	webhookController := controllers.NewWebhookController(webhookService)
 
 	router := gin.Default()
 	router.Static("/images", "./images")
@@ -62,5 +67,21 @@ func main() {
 	api.GET("/transactions", middlewares.AuthMiddleware(authService, userService), transactionController.Index)
 	api.POST("/transactions/store", middlewares.AuthMiddleware(authService, userService), transactionController.Store)
 
-	router.Run()
+	api.POST("/midtrans/notification", webhookController.MidtransNotification)
+
+	// router.Run()
+
+	/** Run with ngrok */
+	ctx := context.Background()
+
+	listener, err := ngrok.Listen(ctx, config.HTTPEndpoint())
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Printf("public address: %s\n", listener.Addr())
+
+	if err := router.RunListener(listener); err != nil {
+		log.Fatalln(err)
+	}
 }

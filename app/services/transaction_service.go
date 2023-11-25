@@ -8,7 +8,9 @@ import (
 
 type TransactionService interface {
 	GetTransactions(userID int, campaignID int) ([]structs.Transaction, error)
+	GetTransactionByCode(code string) (structs.Transaction, error)
 	CreateTransaction(request structs.TransactionStoreRequest) (structs.Transaction, error)
+	UpdateTransaction(transaction structs.Transaction) (structs.Transaction, error)
 }
 
 type transactionService struct {
@@ -50,6 +52,16 @@ func (s *transactionService) GetTransactions(userID int, campaignID int) ([]stru
 	return transactions, nil
 }
 
+func (s *transactionService) GetTransactionByCode(code string) (structs.Transaction, error) {
+	transaction, err := s.transactionRepo.FindTransactionByCode(code)
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
+}
+
 func (s *transactionService) CreateTransaction(request structs.TransactionStoreRequest) (structs.Transaction, error) {
 	code := helpers.GenerateRandomCode()
 	
@@ -85,4 +97,14 @@ func (s *transactionService) CreateTransaction(request structs.TransactionStoreR
 	}
 
 	return updatedTransaction, nil
+}
+
+func (s *transactionService) UpdateTransaction(transaction structs.Transaction) (structs.Transaction, error) {
+	transaction, err := s.transactionRepo.Update(transaction)
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, nil
 }
