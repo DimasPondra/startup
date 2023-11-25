@@ -8,6 +8,7 @@ import (
 	"startup/app/repositories"
 	"startup/app/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"golang.ngrok.com/ngrok"
@@ -48,7 +49,10 @@ func main() {
 	webhookController := controllers.NewWebhookController(webhookService)
 
 	router := gin.Default()
+	router.Use(cors.Default())
+
 	router.Static("/images", "./images")
+
 	api := router.Group("/api/v1")
 
 	api.POST("/auth/register", userController.Register)
@@ -69,9 +73,10 @@ func main() {
 
 	api.POST("/midtrans/notification", webhookController.MidtransNotification)
 
+	/** Running in local */
 	// router.Run()
 
-	/** Run with ngrok */
+	/** Running with ngrok */
 	ctx := context.Background()
 
 	listener, err := ngrok.Listen(ctx, config.HTTPEndpoint())
