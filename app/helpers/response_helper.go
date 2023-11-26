@@ -44,6 +44,10 @@ func FormatValidationError(err error) []string {
 			message = "Field " + field + " must be a valid email."
 		} else if tag == "min" {
 			message = "Field " + field + " must be at least " + param + " characters."
+		} else if tag == "number" {
+			message = "Field " + field + " must be a number."
+		} else if tag == "gt" {
+			message = "Field " + field + " must be a greater than " + param + "."
 		}
 
 		errors = append(errors, message)

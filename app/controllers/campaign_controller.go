@@ -24,8 +24,8 @@ func (h *campaignController) Index(c *gin.Context) {
 
 	campaigns, err := h.campaignService.GetCampaigns(userID)
 	if err != nil {
-		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusBadRequest, "error", nil)
-		c.JSON(http.StatusBadRequest, res)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
