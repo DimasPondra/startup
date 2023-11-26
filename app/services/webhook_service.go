@@ -53,7 +53,7 @@ func (s *webhookService) MidtransNotification(request structs.PaymentNotificatio
 		campaign.BackerCount += 1
 		campaign.CurrentAmount += transaction.Amount
 
-		_, err = s.campaignService.UpdateCampaign(structs.CampaignUpdateRequest{}, campaign, true)
+		err = s.campaignService.UpdateCampaignFromWebhook(campaign)
 		if err != nil {
 			return err
 		}

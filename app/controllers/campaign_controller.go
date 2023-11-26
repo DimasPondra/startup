@@ -128,7 +128,7 @@ func (h *campaignController) Update(c *gin.Context) {
 		}
 	}
 
-	_, err = h.campaignService.UpdateCampaign(request, campaign, false)
+	_, err = h.campaignService.UpdateCampaign(request, campaign)
 	if err != nil {
 		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)
