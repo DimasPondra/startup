@@ -21,11 +21,9 @@ func NewCampaignImageService(campaignImageRepo repositories.CampaignImageReposit
 
 func (s *campaignImageService) SaveImage(filename string, isPrimary bool, campaign structs.Campaign) (structs.CampaignImage, error) {
 	var campaignImage structs.CampaignImage
-	var primary int
+	primary := 1
 
-	if isPrimary {
-		primary = 1
-	} else {
+	if !isPrimary {
 		primary = 0
 	}
 

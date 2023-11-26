@@ -9,9 +9,9 @@ import (
 
 type CampaignService interface {
 	GetCampaigns(userID int) ([]structs.Campaign, error)
-	GetCampaignBySlug(slug string) (structs.Campaign, error)
-	GetCampaignByName(name string) (structs.Campaign, error)
 	GetCampaignByID(ID int) (structs.Campaign, error)
+	GetCampaignByName(name string) (structs.Campaign, error)
+	GetCampaignBySlug(slug string) (structs.Campaign, error)
 	CreateCampaign(request structs.CampaignStoreRequest) (structs.Campaign, error)
 	UpdateCampaign(request structs.CampaignUpdateRequest, campaign structs.Campaign, status bool) (structs.Campaign, error)
 }
@@ -42,8 +42,8 @@ func (s *campaignService) GetCampaigns(userID int) ([]structs.Campaign, error) {
 	return campaigns, nil
 }
 
-func (s *campaignService) GetCampaignBySlug(slug string) (structs.Campaign, error) {
-	campaign, err := s.campaignRepo.FindCampaignBySlug(slug)
+func (s *campaignService) GetCampaignByID(ID int) (structs.Campaign, error) {
+	campaign, err := s.campaignRepo.FindCampaignByID(ID)
 
 	if err != nil {
 		return campaign, err
@@ -62,8 +62,8 @@ func (s *campaignService) GetCampaignByName(name string) (structs.Campaign, erro
 	return campaign, nil
 }
 
-func (s *campaignService) GetCampaignByID(ID int) (structs.Campaign, error) {
-	campaign, err := s.campaignRepo.FindCampaignByID(ID)
+func (s *campaignService) GetCampaignBySlug(slug string) (structs.Campaign, error) {
+	campaign, err := s.campaignRepo.FindCampaignBySlug(slug)
 
 	if err != nil {
 		return campaign, err
@@ -115,8 +115,6 @@ func (s *campaignService) UpdateCampaign(request structs.CampaignUpdateRequest, 
 	campaign.Description = request.Description
 	campaign.GoalAmount = request.GoalAmount
 	campaign.Perks = request.Perks
-	// campaign.CurrentAmount = request.CurrentAmount
-	// campaign.BackerCount = request.BackerCount
 
 	newCampaign, err := s.campaignRepo.Update(campaign)
 

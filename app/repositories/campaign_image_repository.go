@@ -7,8 +7,8 @@ import (
 )
 
 type CampaignImageRepository interface {
-	Create(campaignImage structs.CampaignImage) (structs.CampaignImage, error)
 	FindImagesByCampaignID(campaignID int) ([]structs.CampaignImage, error)
+	Create(campaignImage structs.CampaignImage) (structs.CampaignImage, error)
 	DeleteAllImages(campaignImages []structs.CampaignImage) (bool, error)
 }
 
@@ -18,16 +18,6 @@ type campaignImageRepository struct {
 
 func NewCampaignImageRepository(db *gorm.DB) *campaignImageRepository {
 	return &campaignImageRepository{db}
-}
-
-func (r *campaignImageRepository) Create(campaignImage structs.CampaignImage) (structs.CampaignImage, error) {
-	err := r.db.Create(&campaignImage).Error
-
-	if err != nil {
-		return campaignImage, err
-	}
-
-	return campaignImage, nil
 }
 
 func (r *campaignImageRepository) FindImagesByCampaignID(campaignID int) ([]structs.CampaignImage, error) {
@@ -40,6 +30,16 @@ func (r *campaignImageRepository) FindImagesByCampaignID(campaignID int) ([]stru
 	}
 
 	return campaignImages, nil
+}
+
+func (r *campaignImageRepository) Create(campaignImage structs.CampaignImage) (structs.CampaignImage, error) {
+	err := r.db.Create(&campaignImage).Error
+
+	if err != nil {
+		return campaignImage, err
+	}
+
+	return campaignImage, nil
 }
 
 func (r *campaignImageRepository) DeleteAllImages(campaignImages []structs.CampaignImage) (bool, error) {

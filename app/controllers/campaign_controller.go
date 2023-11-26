@@ -24,14 +24,14 @@ func (h *campaignController) Index(c *gin.Context) {
 
 	campaigns, err := h.campaignService.GetCampaigns(userID)
 	if err != nil {
-		res := helpers.ResponseAPI("Something went wrong", http.StatusBadRequest, "error", nil)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	formatter := structs.ResponseCampaigns(campaigns)
+	formatter := structs.CampaignsSummaryResponse(campaigns)
 
-	res := helpers.ResponseAPI("List of campaigns", http.StatusOK, "success", formatter)
+	res := helpers.ResponseAPI("List of campaigns.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -39,16 +39,13 @@ func (h *campaignController) Show(c *gin.Context) {
 	slug := c.Param("slug")
 
 	campaign, err := h.campaignService.GetCampaignBySlug(slug)
-
 	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-		res := helpers.ResponseAPI("Campaign not found.", http.StatusNotFound, "error", errorMessage)
+		res := helpers.ResponseAPI("Campaign not found.", http.StatusNotFound, "error", nil)
 		c.JSON(http.StatusNotFound, res)
 		return
 	}
 
-	formatter := structs.ResponseCampaign(campaign)
-
+	formatter := structs.CampaignResponse(campaign)
 	res := helpers.ResponseAPI("Detail campaign.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
@@ -68,7 +65,8 @@ func (h *campaignController) Store(c *gin.Context) {
 
 	campaign, _ := h.campaignService.GetCampaignByName(request.Name)
 	if campaign.ID != 0 {
-		errorMessage := gin.H{"errors": "Name is already in use."}
+		var errors []string
+		errorMessage := gin.H{"errors": append(errors, "Field Name is already in use.")}
 
 		res := helpers.ResponseAPI("Failed to create a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
@@ -77,11 +75,10 @@ func (h *campaignController) Store(c *gin.Context) {
 
 	user := c.MustGet("currentUser").(structs.User)
 	request.User = user
+
 	_, err = h.campaignService.CreateCampaign(request)
 	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-
-		res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
@@ -92,16 +89,6 @@ func (h *campaignController) Store(c *gin.Context) {
 
 func (h *campaignController) Update(c *gin.Context) {
 	var request structs.CampaignUpdateRequest
-
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
-		errors := helpers.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-
-		res := helpers.ResponseAPI("Failed to update a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, res)
-		return
-	}
 
 	slug := c.Param("slug")
 	campaign, err := h.campaignService.GetCampaignBySlug(slug)
@@ -118,11 +105,22 @@ func (h *campaignController) Update(c *gin.Context) {
 		return
 	}
 
+	err = c.ShouldBindJSON(&request)
+	if err != nil {
+		errors := helpers.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		res := helpers.ResponseAPI("Failed to update a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
 	if campaign.Name != request.Name {
 		checkCampaign, _ := h.campaignService.GetCampaignByName(request.Name)
 
 		if checkCampaign.ID != 0 {
-			errorMessage := gin.H{"errors": "Name is already in use."}
+			var errors []string
+			errorMessage := gin.H{"errors": append(errors, "Field Name is already in use.")}
 
 			res := helpers.ResponseAPI("Failed to update a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
 			c.JSON(http.StatusUnprocessableEntity, res)
@@ -132,9 +130,7 @@ func (h *campaignController) Update(c *gin.Context) {
 
 	_, err = h.campaignService.UpdateCampaign(request, campaign, false)
 	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-
-		res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
@@ -146,7 +142,7 @@ func (h *campaignController) Update(c *gin.Context) {
 func (h *campaignController) UploadImages(c *gin.Context) {
 	campaign, err := h.campaignService.GetCampaignBySlug(c.Param("slug"))
 	if err != nil {
-		res := helpers.ResponseAPI("Campaign Not Found", http.StatusNotFound, "error", nil)
+		res := helpers.ResponseAPI("Campaign Not Found.", http.StatusNotFound, "error", nil)
 		c.JSON(http.StatusNotFound, res)
 		return
 	}
@@ -160,7 +156,9 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 
 	form, err := c.MultipartForm()
 	if err != nil {
-		errorMessage := gin.H{"errors": "files is required."}
+		var errors []string
+		errorMessage := gin.H{"errors": append(errors, "Field Files is required.")}
+		
 		res := helpers.ResponseAPI("Failed to upload images.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
@@ -169,7 +167,9 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 	files := form.File["files[]"]
 
 	if len(files) == 0 {
-		errorMessage := gin.H{"errors": "files is required."}
+		var errors []string
+		errorMessage := gin.H{"errors": append(errors, "Field Files is required.")}
+		
 		res := helpers.ResponseAPI("Failed to upload images.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
@@ -177,7 +177,7 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 
 	_, err = h.campaignImageService.DeleteImages(campaign.ID)
 	if err != nil {
-		res := helpers.ResponseAPI("Failed to delete images.", http.StatusInternalServerError, "error", nil)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
@@ -190,16 +190,14 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 		
 		err := c.SaveUploadedFile(file, path)
 		if err != nil {
-			data := gin.H{"is_uploaded": false}
-			res := helpers.ResponseAPI("Failed to upload images.", http.StatusBadRequest, "error", data)
+			res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusBadRequest, "error", nil)
 			c.JSON(http.StatusBadRequest, res)
 			return
 		}
 
 		_, err = h.campaignImageService.SaveImage(path, primary, campaign)
 		if err != nil {
-			errorMessage := gin.H{"errors": err.Error()}
-			res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+			res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 			c.JSON(http.StatusInternalServerError, res)
 			return
 		}
