@@ -46,7 +46,7 @@ func (h *transactionController) Store(c *gin.Context) {
 		return
 	}
 
-	_, err = h.campaignService.GetCampaignByID(request.CampaignID)
+	campaign, err := h.campaignService.GetCampaignByID(request.CampaignID)
 	if err != nil {
 		var errors []string
 		errorMessage := gin.H{"errors": append(errors, "Campaign not found.")}
@@ -58,6 +58,12 @@ func (h *transactionController) Store(c *gin.Context) {
 
 	user := c.MustGet("currentUser").(structs.User)
 	request.User = user
+
+	if campaign.UserID == user.ID {
+		res := helpers.ResponseAPI("Can't fund this campaign, please choose another.", http.StatusForbidden, "error", nil)
+		c.JSON(http.StatusForbidden, res)
+		return
+	}
 
 	transaction, err := h.transactionService.CreateTransaction(request)
 	if err != nil {
