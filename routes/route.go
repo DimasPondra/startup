@@ -26,7 +26,7 @@ func Init(db *gorm.DB) {
 	webhookService := services.NewWebhookService(transactionService, campaignService)
 
 	userController := controllers.NewUserController(userService, authService)
-	campaignController := controllers.NewCampaignController(campaignService, campaignImageService)
+	campaignController := controllers.NewCampaignController(campaignService, campaignImageService, transactionService)
 	transactionController := controllers.NewTransactionController(transactionService, campaignService)
 	webhookController := controllers.NewWebhookController(webhookService)
 
@@ -51,6 +51,7 @@ func Init(db *gorm.DB) {
 	api.POST("/campaigns/store", authMiddleware, campaignController.Store)
 	api.PATCH("/campaigns/:slug/update", authMiddleware, campaignController.Update)
 	api.POST("/campaigns/:slug/upload-images", authMiddleware, campaignController.UploadImages)
+	api.GET("/campaigns/:slug/transactions", authMiddleware, campaignController.ShowTransactions)
 
 	api.GET("/transactions", authMiddleware, transactionController.Index)
 	api.POST("/transactions/store", authMiddleware, transactionController.Store)

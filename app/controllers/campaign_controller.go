@@ -13,10 +13,11 @@ import (
 type campaignController struct {
 	campaignService services.CampaignService
 	campaignImageService services.CampaignImageService
+	transactionService services.TransactionService
 }
 
-func NewCampaignController(campaignService services.CampaignService, campaignImageService services.CampaignImageService) *campaignController {
-	return &campaignController{campaignService, campaignImageService}
+func NewCampaignController(campaignService services.CampaignService, campaignImageService services.CampaignImageService, transactionService services.TransactionService) *campaignController {
+	return &campaignController{campaignService, campaignImageService, transactionService}
 }
 
 func (h *campaignController) Index(c *gin.Context) {
@@ -204,5 +205,34 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 	}
 
 	res := helpers.ResponseAPI("Campaign image successfully uploaded.", http.StatusOK, "success", nil)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *campaignController) ShowTransactions(c *gin.Context) {
+	slug := c.Param("slug")
+
+	campaign, err := h.campaignService.GetCampaignBySlug(slug)
+	if err != nil {
+		res := helpers.ResponseAPI("Campaign not found.", http.StatusNotFound, "error", nil)
+		c.JSON(http.StatusNotFound, res)
+		return
+	}
+
+	user := c.MustGet("currentUser").(structs.User)
+	if campaign.UserID != user.ID {
+		res := helpers.ResponseAPI("Can't access this data.", http.StatusForbidden, "error", nil)
+		c.JSON(http.StatusForbidden, res)
+		return
+	}
+
+	transactions, err := h.transactionService.GetTransactionsByCampaignID(campaign.ID)
+	if err != nil {
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	formatter := structs.CampaignTransactionsResponse(transactions)
+	res := helpers.ResponseAPI("List of transactions by campaign.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }

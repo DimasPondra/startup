@@ -116,3 +116,50 @@ func splitPerks(perks string) []string {
 
 	return splitOfPerks
 }
+
+type campaignTransactionResponse struct {
+	ID 			int 							`json:"id"`
+	Amount    	int                         	`json:"amount"`
+	Status    	string                      	`json:"status"`
+	CreatedAt 	string                      	`json:"created_at"`
+	User		campaignTransactionUserResponse	`json:"user"`
+}
+
+type campaignTransactionUserResponse struct {
+	Name 		string 	`json:"name"`
+	ImageURL	*string	`json:"image_url"`
+}
+
+func CampaignTransactionsResponse(transactions []Transaction) []campaignTransactionResponse {
+	listTransactions := []campaignTransactionResponse{}
+	appUrl := os.Getenv("APP_URL")
+
+	for _, transaction := range transactions {
+		if transaction.Status == "paid" {
+			createdAtFormatted := transaction.CreatedAt.Format("Monday 02, January 2006")
+	
+			transactionFormatter := campaignTransactionResponse{
+				ID: transaction.ID,
+				Amount: transaction.Amount,
+				Status: transaction.Status,
+				CreatedAt: createdAtFormatted,
+			}
+	
+			user := campaignTransactionUserResponse{
+				Name: transaction.User.Name,
+				ImageURL: nil,
+			}
+	
+			if transaction.User.AvatarFileName != "" {
+				filename := appUrl + transaction.User.AvatarFileName
+				user.ImageURL = &filename
+			}
+	
+			transactionFormatter.User = user
+	
+			listTransactions = append(listTransactions, transactionFormatter)
+		}
+	}
+
+	return listTransactions
+}
