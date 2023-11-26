@@ -5,7 +5,6 @@ import (
 	"startup/app/helpers"
 	"startup/app/services"
 	"startup/app/structs"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,10 +19,9 @@ func NewTransactionController(transactionService services.TransactionService, ca
 }
 
 func (h *transactionController) Index(c *gin.Context) {
-	userID, _ := strconv.Atoi(c.Query("user_id"))
-	campaignID, _ := strconv.Atoi(c.Query("campaign_id"))
+	user := c.MustGet("currentUser").(structs.User)
 
-	transactions, err := h.transactionService.GetTransactions(userID, campaignID)
+	transactions, err := h.transactionService.GetTransactionsByUserID(user.ID)
 	if err != nil {
 		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)

@@ -30,6 +30,8 @@ func Init(db *gorm.DB) {
 	transactionController := controllers.NewTransactionController(transactionService, campaignService)
 	webhookController := controllers.NewWebhookController(webhookService)
 
+	authMiddleware := middlewares.AuthMiddleware(authService, userService)
+
 	router := gin.Default()
 	router.Use(cors.Default())
 
@@ -41,17 +43,17 @@ func Init(db *gorm.DB) {
 	api.POST("/auth/login", userController.Login)
 	api.POST("/auth/check-email", userController.CheckEmailAvailability)
 
-	api.GET("/users", middlewares.AuthMiddleware(authService, userService), userController.FetchUser)
-	api.POST("/users/avatar", middlewares.AuthMiddleware(authService, userService), userController.UploadAvatar)
+	api.GET("/users", authMiddleware, userController.FetchUser)
+	api.POST("/users/avatar", authMiddleware, userController.UploadAvatar)
 
 	api.GET("/campaigns", campaignController.Index)
 	api.GET("/campaigns/:slug/show", campaignController.Show)
-	api.POST("/campaigns/store", middlewares.AuthMiddleware(authService, userService), campaignController.Store)
-	api.PATCH("/campaigns/:slug/update", middlewares.AuthMiddleware(authService, userService), campaignController.Update)
-	api.POST("/campaigns/:slug/upload-images", middlewares.AuthMiddleware(authService, userService), campaignController.UploadImages)
+	api.POST("/campaigns/store", authMiddleware, campaignController.Store)
+	api.PATCH("/campaigns/:slug/update", authMiddleware, campaignController.Update)
+	api.POST("/campaigns/:slug/upload-images", authMiddleware, campaignController.UploadImages)
 
-	api.GET("/transactions", middlewares.AuthMiddleware(authService, userService), transactionController.Index)
-	api.POST("/transactions/store", middlewares.AuthMiddleware(authService, userService), transactionController.Store)
+	api.GET("/transactions", authMiddleware, transactionController.Index)
+	api.POST("/transactions/store", authMiddleware, transactionController.Store)
 
 	api.POST("/midtrans/notification", webhookController.MidtransNotification)
 

@@ -3,22 +3,17 @@ package structs
 import "os"
 
 type transactionSummaryResponse struct {
-	ID        int                         `json:"id"`
-	Amount    int                         `json:"amount"`
-	Status    string                      `json:"status"`
-	CreatedAt string                      `json:"created_at"`
-	Campaign  transactionCampaignResponse `json:"campaign"`
-	User      transactionUserResponse     `json:"user"`
+	ID        	int                         `json:"id"`
+	Amount    	int                         `json:"amount"`
+	Status    	string                      `json:"status"`
+	PaymentURL	*string						`json:"payment_url"`
+	CreatedAt 	string                      `json:"created_at"`
+	Campaign  	transactionCampaignResponse `json:"campaign"`
 }
 
 type transactionCampaignResponse struct {
 	Name     string  `json:"name"`
 	ImageURL *string `json:"image_url"`
-}
-
-type transactionUserResponse struct {
-	Name     string `json:"name"`
-	ImageURL string `json:"image_url"`
 }
 
 func TransactionsSummaryResponse(transactions []Transaction) []transactionSummaryResponse {
@@ -34,7 +29,12 @@ func TransactionsSummaryResponse(transactions []Transaction) []transactionSummar
 			ID:        transaction.ID,
 			Amount:    transaction.Amount,
 			Status:    transaction.Status,
+			PaymentURL: nil,
 			CreatedAt: createdAtFormatted,
+		}
+
+		if transaction.Status == "pending" {
+			transactionFormatter.PaymentURL = &transaction.PaymentURL
 		}
 
 		if len(transaction.Campaign.CampaignImages) > 0 {
@@ -47,17 +47,7 @@ func TransactionsSummaryResponse(transactions []Transaction) []transactionSummar
 			ImageURL: campaignImage,
 		}
 
-		user := transactionUserResponse{
-			Name: transaction.User.Name,
-			ImageURL: "",
-		}
-
-		if transaction.User.AvatarFileName != "" {
-			user.ImageURL = appUrl + transaction.User.AvatarFileName
-		}
-
 		transactionFormatter.Campaign = campaign
-		transactionFormatter.User = user
 
 		listTransactions = append(listTransactions, transactionFormatter)
 	}

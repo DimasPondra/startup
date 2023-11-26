@@ -8,6 +8,7 @@ import (
 
 type TransactionService interface {
 	GetTransactions(userID int, campaignID int) ([]structs.Transaction, error)
+	GetTransactionsByUserID(userID int) ([]structs.Transaction, error)
 	GetTransactionByCode(code string) (structs.Transaction, error)
 	CreateTransaction(request structs.TransactionStoreRequest) (structs.Transaction, error)
 	UpdateTransaction(transaction structs.Transaction) (structs.Transaction, error)
@@ -44,6 +45,16 @@ func (s *transactionService) GetTransactions(userID int, campaignID int) ([]stru
 	}
 
 	transactions, err := s.transactionRepo.FindAll()
+
+	if err != nil {
+		return transactions, err
+	}
+
+	return transactions, nil
+}
+
+func (s *transactionService) GetTransactionsByUserID(userID int) ([]structs.Transaction, error) {
+	transactions, err := s.transactionRepo.FindTransactionsByUserID(userID)
 
 	if err != nil {
 		return transactions, err
