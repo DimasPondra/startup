@@ -7,9 +7,9 @@ import (
 )
 
 type UserRepository interface {
-	Save(user structs.User) (structs.User, error)
-	FindByEmail(email string) (structs.User, error)
 	FindByID(id int) (structs.User, error)
+	FindByEmail(email string) (structs.User, error)
+	Save(user structs.User) (structs.User, error)
 	Update(user structs.User) (structs.User, error)
 }
 
@@ -21,8 +21,10 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 	return &userRepository{db}
 }
 
-func (r *userRepository) Save(user structs.User) (structs.User, error) {
-	err := r.db.Create(&user).Error
+func (r *userRepository) FindByID(id int) (structs.User, error) {
+	var user structs.User
+
+	err := r.db.Where("id = ?", id).First(&user).Error
 
 	if err != nil {
 		return user, err
@@ -43,10 +45,8 @@ func (r *userRepository) FindByEmail(email string) (structs.User, error) {
 	return user, nil
 }
 
-func (r *userRepository) FindByID(id int) (structs.User, error) {
-	var user structs.User
-
-	err := r.db.Where("id = ?", id).First(&user).Error
+func (r *userRepository) Save(user structs.User) (structs.User, error) {
+	err := r.db.Create(&user).Error
 
 	if err != nil {
 		return user, err

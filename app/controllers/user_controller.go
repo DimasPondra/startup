@@ -26,22 +26,30 @@ func (h *userController) Register(c *gin.Context) {
 		errors := helpers.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
 
-		res := helpers.ResponseAPI("Register account failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		res := helpers.ResponseAPI("Register account failed.", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, res)
+		return
+	}
+
+	if result, _ := h.userService.IsEmailAvailable(structs.CheckEmailRequest{Email: request.Email}); !result {
+		var errors []string
+		errorMessage := gin.H{"errors": append(errors, "Field Email is already in use.")}
+
+		res := helpers.ResponseAPI("Register account failed.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
 
 	user, err := h.userService.Register(request)
 	if err != nil {
-		res := helpers.ResponseAPI("Register account failed", http.StatusBadRequest, "error", nil)
-		c.JSON(http.StatusBadRequest, res)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
 	token, err := h.authService.GenerateToken(user.ID)
 	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-		res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
@@ -59,30 +67,30 @@ func (h *userController) Login(c *gin.Context) {
 		errors := helpers.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
 
-		res := helpers.ResponseAPI("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		res := helpers.ResponseAPI("Login failed.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
 
 	user, err := h.userService.Login(request)
 	if err != nil {
-		errorMessage := gin.H{"errors": "email or password invalid."}
+		var errors []string
+		errorMessage := gin.H{"errors": append(errors, "Email or password invalid.")}
 
-		res := helpers.ResponseAPI("Login failed", http.StatusUnauthorized, "error", errorMessage)
+		res := helpers.ResponseAPI("Login failed.", http.StatusUnauthorized, "error", errorMessage)
 		c.JSON(http.StatusUnauthorized, res)
 		return
 	}
 
 	token, err := h.authService.GenerateToken(user.ID)
 	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-		res := helpers.ResponseAPI("Something went wrong.", http.StatusInternalServerError, "error", errorMessage)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
 	formatter := structs.UserResponse(user, token)
-	res := helpers.ResponseAPI("Successfully logged in", http.StatusOK, "success", formatter)
+	res := helpers.ResponseAPI("Successfully logged in.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -101,12 +109,10 @@ func (h *userController) CheckEmailAvailability(c *gin.Context) {
 
 	isEmailAvailable, _ := h.userService.IsEmailAvailable(request)
 	data := gin.H{"is_available": isEmailAvailable}
-	var message string
+	message := "Email address has been registered."
 
 	if isEmailAvailable {
 		message = "Email is available."
-	} else {
-		message = "Email address has been registered."
 	}
 
 	res := helpers.ResponseAPI(message, http.StatusOK, "success", data)
@@ -117,20 +123,21 @@ func (h *userController) UploadAvatar(c *gin.Context) {
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		data := gin.H{"errors": "avatar is required."}
-		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusUnprocessableEntity, "error", data)
+		var errors []string
+		errorMessage := gin.H{"errors": append(errors, "Field Avatar is required.")}
+
+		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
 
-	filename := helpers.GenerateRandomFileName(file.Filename)
+	filename := helpers.GenerateRandomFileName(file.Filename) // not yet validation file type in here
 	path := "images/avatars/" + filename
 
 	err = c.SaveUploadedFile(file, path)
 	if err != nil {
-		data := gin.H{"is_uploaded": false}
-		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusBadRequest, "error", data)
-		c.JSON(http.StatusBadRequest, res)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
@@ -138,14 +145,12 @@ func (h *userController) UploadAvatar(c *gin.Context) {
 
 	_, err = h.userService.SaveAvatar(currentUser.ID, path)
 	if err != nil {
-		data := gin.H{"is_uploaded": false}
-		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusBadRequest, "error", data)
-		c.JSON(http.StatusBadRequest, res)
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	data := gin.H{"is_uploaded": true}
-	res := helpers.ResponseAPI("Avatar successfully uploaded.", http.StatusOK, "success", data)
+	res := helpers.ResponseAPI("Avatar successfully uploaded.", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, res)
 }
 

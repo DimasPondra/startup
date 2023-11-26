@@ -32,5 +32,4 @@ func (h *webhookController) MidtransNotification(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, nil)
-	return
 }

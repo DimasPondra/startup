@@ -32,7 +32,21 @@ func FormatValidationError(err error) []string {
 	var errors []string
 
 	for _, e := range err.(validator.ValidationErrors) {
-		errors = append(errors, e.Error())
+		tag := e.ActualTag() // tag ex: required, min
+		field := e.Field() // field ex: Occupation, Password
+		param := e.Param() // field ex: 6(this value from min)
+
+		message := "Validation error on field " + field
+
+		if tag == "required" {
+			message = "Field " + field + " is required."
+		} else if tag == "email" {
+			message = "Field " + field + " must be a valid email."
+		} else if tag == "min" {
+			message = "Field " + field + " must be at least " + param + " characters."
+		}
+
+		errors = append(errors, message)
 	}
 
 	return errors
