@@ -112,9 +112,13 @@ func CampaignResponse(campaign Campaign) campaignDetailResponse {
 }
 
 func splitPerks(perks string) []string {
-	splitOfPerks := strings.Split(perks, ",")
+	results := []string{}
 
-	return splitOfPerks
+	for _, perk := range strings.Split(perks, ",") {
+		results = append(results, strings.TrimSpace(perk))
+	}
+
+	return results
 }
 
 type campaignTransactionResponse struct {
