@@ -14,6 +14,6 @@ type Transaction struct {
 	UpdatedAt	time.Time
 	CampaignID 	int
 	UserID     	int
-	Campaign    Campaign
+	Campaign	Campaign
 	User		User
 }

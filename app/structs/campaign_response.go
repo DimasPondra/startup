@@ -49,16 +49,16 @@ func getImageUrl(campaignImages []CampaignImage) *string {
 }
 
 type campaignDetailResponse struct {
-	ID 					int 					`json:"id"`
-	Name 				string 					`json:"name"`
-	ShortDescription 	string					`json:"short_description"`
-	Description 		string					`json:"description"`
-	GoalAmount 			int 					`json:"goal_amount"`
-	CurrentAmount 		int 					`json:"current_amount"`
-	Perks 				[]string 				`json:"perks"`
-	BackerCount 		int 					`json:"backer_count"`
-	User 				campaignUserResponse	`json:"user"`
-	Images 				[]campaignImageResponse	`json:"images"`
+	ID					int						`json:"id"`
+	Name				string					`json:"name"`
+	ShortDescription	string					`json:"short_description"`
+	Description			string					`json:"description"`
+	GoalAmount			int						`json:"goal_amount"`
+	CurrentAmount		int						`json:"current_amount"`
+	Perks				[]string				`json:"perks"`
+	BackerCount			int						`json:"backer_count"`
+	User				campaignUserResponse	`json:"user"`
+	Images				[]campaignImageResponse	`json:"images"`
 }
 
 type campaignUserResponse struct {
@@ -122,7 +122,7 @@ func splitPerks(perks string) []string {
 }
 
 type campaignTransactionResponse struct {
-	ID 			int 							`json:"id"`
+	ID			int								`json:"id"`
 	Amount    	int                         	`json:"amount"`
 	Status    	string                      	`json:"status"`
 	CreatedAt 	string                      	`json:"created_at"`

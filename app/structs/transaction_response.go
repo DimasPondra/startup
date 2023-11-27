@@ -3,12 +3,12 @@ package structs
 import "os"
 
 type transactionSummaryResponse struct {
-	ID        	int                         `json:"id"`
-	Amount    	int                         `json:"amount"`
-	Status    	string                      `json:"status"`
+	ID			int							`json:"id"`
+	Amount		int							`json:"amount"`
+	Status		string						`json:"status"`
 	PaymentURL	*string						`json:"payment_url"`
-	CreatedAt 	string                      `json:"created_at"`
-	Campaign  	transactionCampaignResponse `json:"campaign"`
+	CreatedAt	string						`json:"created_at"`
+	Campaign	transactionCampaignResponse	`json:"campaign"`
 }
 
 type transactionCampaignResponse struct {
