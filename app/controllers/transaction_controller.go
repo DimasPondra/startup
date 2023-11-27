@@ -64,7 +64,7 @@ func (h *transactionController) Store(c *gin.Context) {
 		return
 	}
 
-	campaign, err := h.campaignService.GetCampaignByID(request.CampaignID)
+	campaign, _ := h.campaignService.GetCampaignByID(request.CampaignID)
 	user := c.MustGet("currentUser").(structs.User)
 	request.User = user
 
