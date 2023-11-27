@@ -19,15 +19,5 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// validate := validator.New()
-	// validate.RegisterValidation("email_available", func(fl validator.FieldLevel) bool {
-	// 	value, kind, nullable := fl.ExtractType(fl.Field())
-	// 	fmt.Println("value : " + value.String())
-	// 	fmt.Println("kind : " + kind.String())
-	// 	fmt.Println(nullable)
-
-	// 	return true
-	// })
-
 	routes.Init(db)
 }

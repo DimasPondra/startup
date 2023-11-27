@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"net/http"
+	"startup/app"
 	"startup/app/helpers"
 	"startup/app/services"
 	"startup/app/structs"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type campaignController struct {
@@ -56,18 +58,24 @@ func (h *campaignController) Store(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		errors := helpers.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-
-		res := helpers.ResponseAPI("Failed to create a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, res)
+		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	campaign, _ := h.campaignService.GetCampaignByName(request.Name)
-	if campaign.ID != 0 {
-		var errors []string
-		errorMessage := gin.H{"errors": append(errors, "Field Name is already in use.")}
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	err = app.RegisterCampaignNameAvailableValidation(validate, h.campaignService, c)
+	if err != nil {
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	err = validate.Struct(request)
+	if err != nil {
+		errors := helpers.FormatMessageValidationErrors(err.(validator.ValidationErrors))
+		errorMessage := gin.H{"errors": errors}
 
 		res := helpers.ResponseAPI("Failed to create a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
@@ -108,25 +116,28 @@ func (h *campaignController) Update(c *gin.Context) {
 
 	err = c.ShouldBindJSON(&request)
 	if err != nil {
-		errors := helpers.FormatValidationError(err)
+		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	err = app.RegisterCampaignNameAvailableValidation(validate, h.campaignService, c)
+	if err != nil {
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	err = validate.Struct(request)
+	if err != nil {
+		errors := helpers.FormatMessageValidationErrors(err.(validator.ValidationErrors))
 		errorMessage := gin.H{"errors": errors}
 
 		res := helpers.ResponseAPI("Failed to update a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
-	}
-
-	if campaign.Name != request.Name {
-		checkCampaign, _ := h.campaignService.GetCampaignByName(request.Name)
-
-		if checkCampaign.ID != 0 {
-			var errors []string
-			errorMessage := gin.H{"errors": append(errors, "Field Name is already in use.")}
-
-			res := helpers.ResponseAPI("Failed to update a campaign.", http.StatusUnprocessableEntity, "error", errorMessage)
-			c.JSON(http.StatusUnprocessableEntity, res)
-			return
-		}
 	}
 
 	_, err = h.campaignService.UpdateCampaign(request, campaign)

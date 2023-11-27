@@ -78,6 +78,8 @@ func FormatMessageValidationErrors(errors validator.ValidationErrors) []string {
 			message = "Field " + field + " must be a greater than " + param + "."
 		} else if tag == "email_available" {
 			message = "Field " + field + " is already in use."
+		} else if tag == "campaign_name_available" {
+			message = "Field " + field + " is already in use."
 		}
 
 		errorMessages = append(errorMessages, message)
