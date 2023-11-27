@@ -1,8 +1,8 @@
 package structs
 
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
 }
 
 type RegisterRequest struct {
@@ -13,5 +13,5 @@ type RegisterRequest struct {
 }
 
 type CheckEmailRequest struct {
-	Email string `json:"email" binding:"required,email"`
+	Email string `json:"email" validate:"required,email"`
 }

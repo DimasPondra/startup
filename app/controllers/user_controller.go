@@ -73,7 +73,16 @@ func (h *userController) Login(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		errors := helpers.FormatValidationError(err)
+		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	err = validate.Struct(request)
+	if err != nil {
+		errors := helpers.FormatMessageValidationErrors(err.(validator.ValidationErrors))
 		errorMessage := gin.H{"errors": errors}
 
 		res := helpers.ResponseAPI("Login failed.", http.StatusUnprocessableEntity, "error", errorMessage)
@@ -105,10 +114,19 @@ func (h *userController) Login(c *gin.Context) {
 
 func (h *userController) CheckEmailAvailability(c *gin.Context) {
 	var request structs.CheckEmailRequest
-
+	
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		errors := helpers.FormatValidationError(err)
+		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	err = validate.Struct(request)
+	if err != nil {
+		errors := helpers.FormatMessageValidationErrors(err.(validator.ValidationErrors))
 		errorMessage := gin.H{"errors": errors}
 
 		res := helpers.ResponseAPI("Email checking failed.", http.StatusUnprocessableEntity, "error", errorMessage)
