@@ -10,7 +10,7 @@ type WebhookService interface {
 
 type webhookService struct {
 	transactionService TransactionService
-	campaignService CampaignService
+	campaignService    CampaignService
 }
 
 func NewWebhookService(transactionService TransactionService, campaignService CampaignService) *webhookService {

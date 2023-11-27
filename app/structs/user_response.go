@@ -15,11 +15,11 @@ func UserResponse(user User, token string) userResponse {
 	appUrl := os.Getenv("APP_URL")
 
 	formatter := userResponse{
-		ID: user.ID,
-		Name: user.Name,
+		ID:         user.ID,
+		Name:       user.Name,
 		Occupation: user.Occupation,
-		Email: user.Email,
-		Token: token,
+		Email:      user.Email,
+		Token:      token,
 	}
 
 	if user.AvatarFileName != "" {

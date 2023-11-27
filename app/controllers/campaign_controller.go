@@ -13,9 +13,9 @@ import (
 )
 
 type campaignController struct {
-	campaignService services.CampaignService
+	campaignService      services.CampaignService
 	campaignImageService services.CampaignImageService
-	transactionService services.TransactionService
+	transactionService   services.TransactionService
 }
 
 func NewCampaignController(campaignService services.CampaignService, campaignImageService services.CampaignImageService, transactionService services.TransactionService) *campaignController {
@@ -170,7 +170,7 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 	if err != nil {
 		var errors []string
 		errorMessage := gin.H{"errors": append(errors, "Field Files is required.")}
-		
+
 		res := helpers.ResponseAPI("Failed to upload images.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
@@ -181,7 +181,7 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 	if len(files) == 0 {
 		var errors []string
 		errorMessage := gin.H{"errors": append(errors, "Field Files is required.")}
-		
+
 		res := helpers.ResponseAPI("Failed to upload images.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
@@ -199,7 +199,7 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 
 		filename := helpers.GenerateRandomFileName(file.Filename)
 		path := "images/campaigns/" + filename
-		
+
 		err := c.SaveUploadedFile(file, path)
 		if err != nil {
 			res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusBadRequest, "error", nil)

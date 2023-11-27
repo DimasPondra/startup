@@ -13,7 +13,7 @@ import (
 
 type transactionController struct {
 	transactionService services.TransactionService
-	campaignService services.CampaignService
+	campaignService    services.CampaignService
 }
 
 func NewTransactionController(transactionService services.TransactionService, campaignService services.CampaignService) *transactionController {

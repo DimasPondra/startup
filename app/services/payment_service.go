@@ -12,7 +12,7 @@ type PaymentService interface {
 	GetPaymentURL(request structs.PaymentStoreRequest) (string, error)
 }
 
-type paymentService struct {}
+type paymentService struct{}
 
 func NewPaymentService() *paymentService {
 	return &paymentService{}
@@ -27,9 +27,9 @@ func (s *paymentService) GetPaymentURL(request structs.PaymentStoreRequest) (str
 		midtrans.Environment = midtrans.Sandbox
 	}
 
-	req := & snap.Request{
+	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID: request.Code,
+			OrderID:  request.Code,
 			GrossAmt: int64(request.Amount),
 		},
 		CreditCard: &snap.CreditCardDetails{

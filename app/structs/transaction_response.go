@@ -3,12 +3,12 @@ package structs
 import "os"
 
 type transactionSummaryResponse struct {
-	ID			int							`json:"id"`
-	Amount		int							`json:"amount"`
-	Status		string						`json:"status"`
-	PaymentURL	*string						`json:"payment_url"`
-	CreatedAt	string						`json:"created_at"`
-	Campaign	transactionCampaignResponse	`json:"campaign"`
+	ID         int                         `json:"id"`
+	Amount     int                         `json:"amount"`
+	Status     string                      `json:"status"`
+	PaymentURL *string                     `json:"payment_url"`
+	CreatedAt  string                      `json:"created_at"`
+	Campaign   transactionCampaignResponse `json:"campaign"`
 }
 
 type transactionCampaignResponse struct {
@@ -26,11 +26,11 @@ func TransactionsSummaryResponse(transactions []Transaction) []transactionSummar
 		createdAtFormatted := transaction.CreatedAt.Format("Monday 02, January 2006")
 
 		transactionFormatter := transactionSummaryResponse{
-			ID:        transaction.ID,
-			Amount:    transaction.Amount,
-			Status:    transaction.Status,
+			ID:         transaction.ID,
+			Amount:     transaction.Amount,
+			Status:     transaction.Status,
 			PaymentURL: nil,
-			CreatedAt: createdAtFormatted,
+			CreatedAt:  createdAtFormatted,
 		}
 
 		if transaction.Status == "pending" {
@@ -43,7 +43,7 @@ func TransactionsSummaryResponse(transactions []Transaction) []transactionSummar
 		}
 
 		campaign := transactionCampaignResponse{
-			Name: transaction.Campaign.Name,
+			Name:     transaction.Campaign.Name,
 			ImageURL: campaignImage,
 		}
 
@@ -56,19 +56,19 @@ func TransactionsSummaryResponse(transactions []Transaction) []transactionSummar
 }
 
 type transactionResponse struct {
-	ID			int		`json:"id"`
-	Amount		int		`json:"amount"`
-	Status		string	`json:"status"`
-	Code		string	`json:"code"`
-	PaymentURL	string	`json:"payment_url"`
+	ID         int    `json:"id"`
+	Amount     int    `json:"amount"`
+	Status     string `json:"status"`
+	Code       string `json:"code"`
+	PaymentURL string `json:"payment_url"`
 }
 
 func TransactionResponse(transaction Transaction) transactionResponse {
 	formatter := transactionResponse{
-		ID: transaction.ID,
-		Amount: transaction.Amount,
-		Status: transaction.Status,
-		Code: transaction.Code,
+		ID:         transaction.ID,
+		Amount:     transaction.Amount,
+		Status:     transaction.Status,
+		Code:       transaction.Code,
 		PaymentURL: transaction.PaymentURL,
 	}
 

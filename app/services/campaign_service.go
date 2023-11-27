@@ -75,17 +75,17 @@ func (s *campaignService) GetCampaignBySlug(slug string) (structs.Campaign, erro
 
 func (s *campaignService) CreateCampaign(request structs.CampaignStoreRequest) (structs.Campaign, error) {
 	slug := slug.Make(request.Name)
-	
+
 	campaign := structs.Campaign{
-		Name: request.Name,
-		Slug: slug,
+		Name:             request.Name,
+		Slug:             slug,
 		ShortDescription: request.ShortDescription,
-		Description: request.Description,
-		GoalAmount: request.GoalAmount,
-		CurrentAmount: 0,
-		Perks: request.Perks,
-		BackerCount: 0,
-		UserID: request.User.ID,
+		Description:      request.Description,
+		GoalAmount:       request.GoalAmount,
+		CurrentAmount:    0,
+		Perks:            request.Perks,
+		BackerCount:      0,
+		UserID:           request.User.ID,
 	}
 
 	newCampaign, err := s.campaignRepo.Create(campaign)
@@ -99,7 +99,7 @@ func (s *campaignService) CreateCampaign(request structs.CampaignStoreRequest) (
 
 func (s *campaignService) UpdateCampaign(request structs.CampaignUpdateRequest, campaign structs.Campaign) (structs.Campaign, error) {
 	slug := slug.Make(request.Name)
-	
+
 	campaign.Name = request.Name
 	campaign.Slug = slug
 	campaign.ShortDescription = request.ShortDescription

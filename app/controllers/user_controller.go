@@ -114,7 +114,7 @@ func (h *userController) Login(c *gin.Context) {
 
 func (h *userController) CheckEmailAvailability(c *gin.Context) {
 	var request structs.CheckEmailRequest
-	
+
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
@@ -183,7 +183,7 @@ func (h *userController) UploadAvatar(c *gin.Context) {
 
 func (h *userController) FetchUser(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(structs.User)
-	
+
 	formatter := structs.UserResponse(currentUser, "")
 
 	res := helpers.ResponseAPI("Successfully fetch user data.", http.StatusOK, "success", formatter)

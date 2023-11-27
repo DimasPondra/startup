@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type webhookController struct{
+type webhookController struct {
 	webhookService services.WebhookService
 }
 

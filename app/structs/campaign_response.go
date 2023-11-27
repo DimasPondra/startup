@@ -49,34 +49,34 @@ func getImageUrl(campaignImages []CampaignImage) *string {
 }
 
 type campaignDetailResponse struct {
-	ID					int						`json:"id"`
-	Name				string					`json:"name"`
-	ShortDescription	string					`json:"short_description"`
-	Description			string					`json:"description"`
-	GoalAmount			int						`json:"goal_amount"`
-	CurrentAmount		int						`json:"current_amount"`
-	Perks				[]string				`json:"perks"`
-	BackerCount			int						`json:"backer_count"`
-	User				campaignUserResponse	`json:"user"`
-	Images				[]campaignImageResponse	`json:"images"`
+	ID               int                     `json:"id"`
+	Name             string                  `json:"name"`
+	ShortDescription string                  `json:"short_description"`
+	Description      string                  `json:"description"`
+	GoalAmount       int                     `json:"goal_amount"`
+	CurrentAmount    int                     `json:"current_amount"`
+	Perks            []string                `json:"perks"`
+	BackerCount      int                     `json:"backer_count"`
+	User             campaignUserResponse    `json:"user"`
+	Images           []campaignImageResponse `json:"images"`
 }
 
 type campaignUserResponse struct {
-	Name		string	`json:"name"`
-	ImageURL	string	`json:"image_url"`
+	Name     string `json:"name"`
+	ImageURL string `json:"image_url"`
 }
 
 type campaignImageResponse struct {
-	ImageURL	string	`json:"url"`
-	IsPrimary	bool	`json:"is_primary"`
+	ImageURL  string `json:"url"`
+	IsPrimary bool   `json:"is_primary"`
 }
 
 func CampaignResponse(campaign Campaign) campaignDetailResponse {
 	appUrl := os.Getenv("APP_URL")
 	images := []campaignImageResponse{}
-	
+
 	user := campaignUserResponse{
-		Name: campaign.User.Name,
+		Name:     campaign.User.Name,
 		ImageURL: "",
 	}
 
@@ -88,7 +88,7 @@ func CampaignResponse(campaign Campaign) campaignDetailResponse {
 		isPrimary := image.IsPrimary != 0
 
 		campaignImage := campaignImageResponse{
-			ImageURL: appUrl + image.FileName,
+			ImageURL:  appUrl + image.FileName,
 			IsPrimary: isPrimary,
 		}
 
@@ -96,16 +96,16 @@ func CampaignResponse(campaign Campaign) campaignDetailResponse {
 	}
 
 	formatter := campaignDetailResponse{
-		ID: campaign.ID,
-		Name: campaign.Name,
+		ID:               campaign.ID,
+		Name:             campaign.Name,
 		ShortDescription: campaign.ShortDescription,
-		Description: campaign.Description,
-		GoalAmount: campaign.GoalAmount,
-		CurrentAmount: campaign.CurrentAmount,
-		Perks: splitPerks(campaign.Perks),
-		BackerCount: campaign.BackerCount,
-		User: user,
-		Images: images,
+		Description:      campaign.Description,
+		GoalAmount:       campaign.GoalAmount,
+		CurrentAmount:    campaign.CurrentAmount,
+		Perks:            splitPerks(campaign.Perks),
+		BackerCount:      campaign.BackerCount,
+		User:             user,
+		Images:           images,
 	}
 
 	return formatter
@@ -122,16 +122,16 @@ func splitPerks(perks string) []string {
 }
 
 type campaignTransactionResponse struct {
-	ID			int								`json:"id"`
-	Amount    	int                         	`json:"amount"`
-	Status    	string                      	`json:"status"`
-	CreatedAt 	string                      	`json:"created_at"`
-	User		campaignTransactionUserResponse	`json:"user"`
+	ID        int                             `json:"id"`
+	Amount    int                             `json:"amount"`
+	Status    string                          `json:"status"`
+	CreatedAt string                          `json:"created_at"`
+	User      campaignTransactionUserResponse `json:"user"`
 }
 
 type campaignTransactionUserResponse struct {
-	Name 		string 	`json:"name"`
-	ImageURL	*string	`json:"image_url"`
+	Name     string  `json:"name"`
+	ImageURL *string `json:"image_url"`
 }
 
 func CampaignTransactionsResponse(transactions []Transaction) []campaignTransactionResponse {
@@ -141,26 +141,26 @@ func CampaignTransactionsResponse(transactions []Transaction) []campaignTransact
 	for _, transaction := range transactions {
 		if transaction.Status == "paid" {
 			createdAtFormatted := transaction.CreatedAt.Format("Monday 02, January 2006")
-	
+
 			transactionFormatter := campaignTransactionResponse{
-				ID: transaction.ID,
-				Amount: transaction.Amount,
-				Status: transaction.Status,
+				ID:        transaction.ID,
+				Amount:    transaction.Amount,
+				Status:    transaction.Status,
 				CreatedAt: createdAtFormatted,
 			}
-	
+
 			user := campaignTransactionUserResponse{
-				Name: transaction.User.Name,
+				Name:     transaction.User.Name,
 				ImageURL: nil,
 			}
-	
+
 			if transaction.User.AvatarFileName != "" {
 				filename := appUrl + transaction.User.AvatarFileName
 				user.ImageURL = &filename
 			}
-	
+
 			transactionFormatter.User = user
-	
+
 			listTransactions = append(listTransactions, transactionFormatter)
 		}
 	}

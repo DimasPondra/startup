@@ -31,7 +31,7 @@ func (s *userService) Register(request structs.RegisterRequest) (structs.User, e
 	if err != nil {
 		return user, err
 	}
-	
+
 	user.Name = request.Name
 	user.Occupation = request.Occupation
 	user.Email = request.Email

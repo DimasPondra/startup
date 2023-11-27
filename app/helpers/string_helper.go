@@ -20,7 +20,7 @@ func GenerateRandomFileName(filename string) string {
 	splitFileName := strings.Split(filename, ".")
 	lenghtOfSplit := len(splitFileName)
 
-	typeFile := splitFileName[lenghtOfSplit - 1]
+	typeFile := splitFileName[lenghtOfSplit-1]
 
 	// Random
 	random := generateRandomString(24)

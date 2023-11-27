@@ -17,7 +17,7 @@ type TransactionService interface {
 
 type transactionService struct {
 	transactionRepo repositories.TransactionRepository
-	paymentService PaymentService
+	paymentService  PaymentService
 }
 
 func NewTransactionService(transactionRepo repositories.TransactionRepository, paymentService PaymentService) *transactionService {
@@ -86,13 +86,13 @@ func (s *transactionService) GetTransactionByCode(code string) (structs.Transact
 
 func (s *transactionService) CreateTransaction(request structs.TransactionStoreRequest) (structs.Transaction, error) {
 	code := helpers.GenerateRandomCode()
-	
+
 	transaction := structs.Transaction{
-		Amount: request.Amount,
-		Status: "pending",
-		Code: code,
+		Amount:     request.Amount,
+		Status:     "pending",
+		Code:       code,
 		CampaignID: request.CampaignID,
-		UserID: request.User.ID,
+		UserID:     request.User.ID,
 	}
 
 	newTransaction, err := s.transactionRepo.Create(transaction)
@@ -101,10 +101,10 @@ func (s *transactionService) CreateTransaction(request structs.TransactionStoreR
 	}
 
 	payment := structs.PaymentStoreRequest{
-		Code: newTransaction.Code,
+		Code:   newTransaction.Code,
 		Amount: newTransaction.Amount,
-		Name: request.User.Name,
-		Email: request.User.Email,
+		Name:   request.User.Name,
+		Email:  request.User.Email,
 	}
 
 	paymentURL, err := s.paymentService.GetPaymentURL(payment)

@@ -57,7 +57,7 @@ func (r *userRepository) Save(user structs.User) (structs.User, error) {
 
 func (r *userRepository) Update(user structs.User) (structs.User, error) {
 	err := r.db.Save(&user).Error
-	
+
 	if err != nil {
 		return user, err
 	}
