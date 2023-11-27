@@ -1,6 +1,7 @@
 package services
 
 import (
+	"os"
 	"startup/app/repositories"
 	"startup/app/structs"
 
@@ -74,6 +75,10 @@ func (s *userService) SaveAvatar(id int, fileLocation string) (structs.User, err
 	user, err := s.userRepo.FindByID(id)
 	if err != nil {
 		return user, err
+	}
+
+	if user.AvatarFileName != "" {
+		os.Remove(user.AvatarFileName)
 	}
 
 	user.AvatarFileName = fileLocation
