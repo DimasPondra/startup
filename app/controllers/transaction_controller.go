@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"net/http"
+	"startup/app"
 	"startup/app/helpers"
 	"startup/app/services"
 	"startup/app/structs"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type transactionController struct {
@@ -38,7 +40,23 @@ func (h *transactionController) Store(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		errors := helpers.FormatValidationError(err)
+		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	err = app.RegisterExistsInCampaignsValidation(validate, h.campaignService)
+	if err != nil {
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	err = validate.Struct(request)
+	if err != nil {
+		errors := helpers.FormatMessageValidationErrors(err.(validator.ValidationErrors))
 		errorMessage := gin.H{"errors": errors}
 
 		res := helpers.ResponseAPI("Failed to create a transaction.", http.StatusUnprocessableEntity, "error", errorMessage)
@@ -47,15 +65,6 @@ func (h *transactionController) Store(c *gin.Context) {
 	}
 
 	campaign, err := h.campaignService.GetCampaignByID(request.CampaignID)
-	if err != nil {
-		var errors []string
-		errorMessage := gin.H{"errors": append(errors, "Campaign not found.")}
-
-		res := helpers.ResponseAPI("Failed to create a transaction.", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, res)
-		return
-	}
-
 	user := c.MustGet("currentUser").(structs.User)
 	request.User = user
 

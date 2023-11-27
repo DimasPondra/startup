@@ -80,6 +80,8 @@ func FormatMessageValidationErrors(errors validator.ValidationErrors) []string {
 			message = "Field " + field + " is already in use."
 		} else if tag == "campaign_name_available" {
 			message = "Field " + field + " is already in use."
+		} else if tag == "exists_in_campaigns" {
+			message = "Field " + field + " not registered, campaign not found."
 		}
 
 		errorMessages = append(errorMessages, message)

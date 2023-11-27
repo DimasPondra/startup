@@ -48,3 +48,15 @@ func RegisterCampaignNameAvailableValidation(validate *validator.Validate, campa
 
 	return err
 }
+
+func RegisterExistsInCampaignsValidation(validate *validator.Validate, campaignService services.CampaignService) error {
+	err := validate.RegisterValidation("exists_in_campaigns", func(fl validator.FieldLevel) bool {
+		value, _, _ := fl.ExtractType(fl.Field())
+
+		campaign, _ := campaignService.GetCampaignByID(int(value.Int()))
+
+		return campaign.ID != 0
+	})
+
+	return err
+}
