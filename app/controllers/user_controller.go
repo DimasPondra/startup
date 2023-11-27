@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"net/http"
+	"startup/app"
 	"startup/app/helpers"
 	"startup/app/services"
 	"startup/app/structs"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type userController struct {
@@ -23,17 +25,24 @@ func (h *userController) Register(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		errors := helpers.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-
-		res := helpers.ResponseAPI("Register account failed.", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, res)
+		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	if result, _ := h.userService.IsEmailAvailable(structs.CheckEmailRequest{Email: request.Email}); !result {
-		var errors []string
-		errorMessage := gin.H{"errors": append(errors, "Field Email is already in use.")}
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	err = app.RegisterEmailAvailableValidation(validate, h.userService)
+	if err != nil {
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	err = validate.Struct(request)
+	if err != nil {
+		errors := helpers.FormatMessageValidationErrors(err.(validator.ValidationErrors))
+		errorMessage := gin.H{"errors": errors}
 
 		res := helpers.ResponseAPI("Register account failed.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
