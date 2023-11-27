@@ -58,22 +58,25 @@ func Init(db *gorm.DB) {
 
 	api.POST("/midtrans/notification", webhookController.MidtransNotification)
 
-	/** Running in local */
+	// Running in local
 	router.Run()
 
-	/** Running with ngrok
-	uncomment code below when choosing run ngrok
+	/*
+		Running with ngrok
+		uncomment code below when choosing run ngrok
 	*/
-	// ctx := context.Background()
+	/*
+		ctx := context.Background()
 
-	// listener, err := ngrok.Listen(ctx, config.HTTPEndpoint())
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
+		listener, err := ngrok.Listen(ctx, config.HTTPEndpoint())
+		if err != nil {
+			log.Fatalln(err)
+		}
 
-	// log.Printf("public address: %s\n", listener.Addr())
+		log.Printf("public address: %s\n", listener.Addr())
 
-	// if err := router.RunListener(listener); err != nil {
-	// 	log.Fatalln(err)
-	// }
+		if err := router.RunListener(listener); err != nil {
+			log.Fatalln(err)
+		}
+	*/
 }
