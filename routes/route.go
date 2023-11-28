@@ -18,14 +18,14 @@ func Init(db *gorm.DB) {
 	transactionRepo := repositories.NewTransactionRepository(db)
 	roleRepo := repositories.NewRoleRepository(db)
 
-	userService := services.NewUserService(userRepo)
+	roleService := services.NewRoleService(roleRepo)
+	userService := services.NewUserService(userRepo, roleService)
 	authService := services.NewAuthService()
 	campaignService := services.NewCampaignSevice(campaignRepo)
 	campaignImageService := services.NewCampaignImageService(campaignImageRepo)
 	paymentService := services.NewPaymentService()
 	transactionService := services.NewTransactionService(transactionRepo, paymentService)
 	webhookService := services.NewWebhookService(transactionService, campaignService)
-	roleService := services.NewRoleService(roleRepo)
 
 	userController := controllers.NewUserController(userService, authService)
 	campaignController := controllers.NewCampaignController(campaignService, campaignImageService, transactionService)

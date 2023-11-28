@@ -7,6 +7,7 @@ type userResponse struct {
 	Name       string `json:"name"`
 	Occupation string `json:"occupation"`
 	Email      string `json:"email"`
+	Role       string `json:"role"`
 	Token      string `json:"token"`
 	ImageURL   string `json:"image_url"`
 }
@@ -19,11 +20,12 @@ func UserResponse(user User, token string) userResponse {
 		Name:       user.Name,
 		Occupation: user.Occupation,
 		Email:      user.Email,
+		Role:       user.Role.Name,
 		Token:      token,
 	}
 
-	if user.AvatarFileName != "" {
-		formatter.ImageURL = appUrl + user.AvatarFileName
+	if user.FileID != nil {
+		formatter.ImageURL = appUrl + "images/" + user.File.Location + "/" + user.File.Name
 	}
 
 	return formatter

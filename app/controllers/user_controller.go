@@ -56,7 +56,7 @@ func (h *userController) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.GenerateToken(user.ID)
+	token, err := h.authService.GenerateToken(user)
 	if err != nil {
 		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)
@@ -100,7 +100,7 @@ func (h *userController) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.GenerateToken(user.ID)
+	token, err := h.authService.GenerateToken(user)
 	if err != nil {
 		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)

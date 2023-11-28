@@ -1,7 +1,6 @@
 package services
 
 import (
-	"os"
 	"startup/app/repositories"
 	"startup/app/structs"
 
@@ -18,34 +17,43 @@ type UserService interface {
 
 type userService struct {
 	userRepo repositories.UserRepository
+	roleService RoleService
 }
 
-func NewUserService(userRepo repositories.UserRepository) *userService {
-	return &userService{userRepo}
+func NewUserService(userRepo repositories.UserRepository, roleService RoleService) *userService {
+	return &userService{userRepo, roleService}
 }
 
 func (s *userService) Register(request structs.RegisterRequest) (structs.User, error) {
 	user := structs.User{}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.MinCost)
-
 	if err != nil {
 		return user, err
+	}
+
+	role, err := s.roleService.GetRoleByName("user")
+	if err != nil {
+		return structs.User{}, err
 	}
 
 	user.Name = request.Name
 	user.Occupation = request.Occupation
 	user.Email = request.Email
 	user.PasswordHash = string(passwordHash)
-	user.Role = "user"
+	user.RoleID = role.ID
 
 	newUser, err := s.userRepo.Save(user)
-
 	if err != nil {
 		return newUser, err
 	}
 
-	return newUser, nil
+	getUser, err := s.userRepo.FindByID(newUser.ID)
+	if err != nil {
+		return getUser, err
+	}
+
+	return getUser, nil
 }
 
 func (s *userService) Login(request structs.LoginRequest) (structs.User, error) {
@@ -77,11 +85,11 @@ func (s *userService) SaveAvatar(id int, fileLocation string) (structs.User, err
 		return user, err
 	}
 
-	if user.AvatarFileName != "" {
-		os.Remove(user.AvatarFileName)
-	}
+	// if user.AvatarFileName != "" {
+	// 	os.Remove(user.AvatarFileName)
+	// }
 
-	user.AvatarFileName = fileLocation
+	// user.AvatarFileName = fileLocation
 
 	userUpdated, err := s.userRepo.Update(user)
 	if err != nil {

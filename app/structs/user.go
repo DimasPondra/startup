@@ -5,13 +5,15 @@ import (
 )
 
 type User struct {
-	ID             int
-	Name           string
-	Occupation     string
-	Email          string
-	PasswordHash   string
-	AvatarFileName string
-	Role           string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID           int
+	Name         string
+	Occupation   string
+	Email        string
+	PasswordHash string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	RoleID       int
+	FileID       *int
+	Role         Role
+	File         File
 }

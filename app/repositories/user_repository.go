@@ -24,7 +24,7 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 func (r *userRepository) FindByID(id int) (structs.User, error) {
 	var user structs.User
 
-	err := r.db.Where("id = ?", id).First(&user).Error
+	err := r.db.Preload("Role").First(&user, id).Error
 
 	if err != nil {
 		return user, err

@@ -80,9 +80,9 @@ func CampaignResponse(campaign Campaign) campaignDetailResponse {
 		ImageURL: "",
 	}
 
-	if campaign.User.AvatarFileName != "" {
-		user.ImageURL = appUrl + campaign.User.AvatarFileName
-	}
+	// if campaign.User.AvatarFileName != "" {
+	// 	user.ImageURL = appUrl + campaign.User.AvatarFileName
+	// }
 
 	for _, image := range campaign.CampaignImages {
 		isPrimary := image.IsPrimary != 0
@@ -136,7 +136,7 @@ type campaignTransactionUserResponse struct {
 
 func CampaignTransactionsResponse(transactions []Transaction) []campaignTransactionResponse {
 	listTransactions := []campaignTransactionResponse{}
-	appUrl := os.Getenv("APP_URL")
+	// appUrl := os.Getenv("APP_URL")
 
 	for _, transaction := range transactions {
 		if transaction.Status == "paid" {
@@ -154,10 +154,10 @@ func CampaignTransactionsResponse(transactions []Transaction) []campaignTransact
 				ImageURL: nil,
 			}
 
-			if transaction.User.AvatarFileName != "" {
-				filename := appUrl + transaction.User.AvatarFileName
-				user.ImageURL = &filename
-			}
+			// if transaction.User.AvatarFileName != "" {
+			// 	filename := appUrl + transaction.User.AvatarFileName
+			// 	user.ImageURL = &filename
+			// }
 
 			transactionFormatter.User = user
 

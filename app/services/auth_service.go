@@ -3,12 +3,14 @@ package services
 import (
 	"errors"
 	"os"
+	"startup/app/structs"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthService interface {
-	GenerateToken(userID int) (string, error)
+	GenerateToken(user structs.User) (string, error)
 	ValidateToken(tokenString string) (*jwt.Token, error)
 }
 
@@ -18,9 +20,12 @@ func NewAuthService() *jwtService {
 	return &jwtService{}
 }
 
-func (s *jwtService) GenerateToken(userID int) (string, error) {
+func (s *jwtService) GenerateToken(user structs.User) (string, error) {
 	claim := jwt.MapClaims{
-		"user_id": userID,
+		"user_id": user.ID,
+		"role": user.Role.Name,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
