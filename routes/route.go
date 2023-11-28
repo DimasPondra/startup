@@ -16,6 +16,7 @@ func Init(db *gorm.DB) {
 	campaignRepo := repositories.NewCampaignRepository(db)
 	campaignImageRepo := repositories.NewCampaignImageRepository(db)
 	transactionRepo := repositories.NewTransactionRepository(db)
+	roleRepo := repositories.NewRoleRepository(db)
 
 	userService := services.NewUserService(userRepo)
 	authService := services.NewAuthService()
@@ -24,11 +25,13 @@ func Init(db *gorm.DB) {
 	paymentService := services.NewPaymentService()
 	transactionService := services.NewTransactionService(transactionRepo, paymentService)
 	webhookService := services.NewWebhookService(transactionService, campaignService)
+	roleService := services.NewRoleService(roleRepo)
 
 	userController := controllers.NewUserController(userService, authService)
 	campaignController := controllers.NewCampaignController(campaignService, campaignImageService, transactionService)
 	transactionController := controllers.NewTransactionController(transactionService, campaignService)
 	webhookController := controllers.NewWebhookController(webhookService)
+	roleController := controllers.NewRoleController(roleService)
 
 	authMiddleware := middlewares.AuthMiddleware(authService, userService)
 
@@ -57,6 +60,9 @@ func Init(db *gorm.DB) {
 	api.POST("/transactions/store", authMiddleware, transactionController.Store)
 
 	api.POST("/midtrans/notification", webhookController.MidtransNotification)
+
+	api.GET("/roles", roleController.Index)
+	api.POST("/roles/store", roleController.Store)
 
 	// Running in local
 	router.Run()

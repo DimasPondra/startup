@@ -60,3 +60,15 @@ func RegisterExistsInCampaignsValidation(validate *validator.Validate, campaignS
 
 	return err
 }
+
+func RegisterRoleNameAvailableValidation(validate *validator.Validate, roleService services.RoleService) error {
+	err := validate.RegisterValidation("role_name_available", func(fl validator.FieldLevel) bool {
+		value, _, _ := fl.ExtractType(fl.Field())
+
+		role, _ := roleService.GetRoleByName(value.String())
+
+		return role.ID == 0
+	})
+
+	return err
+}
