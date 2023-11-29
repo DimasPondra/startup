@@ -1,8 +1,11 @@
 package app
 
 import (
+	"fmt"
+	"mime/multipart"
 	"startup/app/services"
 	"startup/app/structs"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -68,6 +71,30 @@ func RegisterRoleNameAvailableValidation(validate *validator.Validate, roleServi
 		role, _ := roleService.GetRoleByName(value.String())
 
 		return role.ID == 0
+	})
+
+	return err
+}
+
+func RegisterImageTypeValidation(validate *validator.Validate) error {
+	err := validate.RegisterValidation("image_type", func(fl validator.FieldLevel) bool {
+		value, _, _ := fl.ExtractType(fl.Field())
+
+		files := value.Interface().([]*multipart.FileHeader)
+		fmt.Println(len(files))
+
+		for _, file := range files {
+			resultOfSplit := strings.Split(file.Filename, ".")
+			lengthOfSplit := len(resultOfSplit)
+
+			imageType := resultOfSplit[lengthOfSplit-1]
+
+			if imageType != "jpg" && imageType != "png" {
+				return false
+			}
+		}
+
+		return true
 	})
 
 	return err

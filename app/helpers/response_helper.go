@@ -58,6 +58,8 @@ func FormatMessageValidationErrors(errors validator.ValidationErrors) []string {
 			message = "Field " + field + " is already in use."
 		} else if tag == "lowercase" {
 			message = "Field " + field + " must be in lowercase."
+		} else if tag == "image_type" {
+			message = "Field " + field + " type must be jpg or png."
 		}
 
 		errorMessages = append(errorMessages, message)
