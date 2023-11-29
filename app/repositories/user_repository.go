@@ -36,7 +36,7 @@ func (r *userRepository) FindByID(id int) (structs.User, error) {
 func (r *userRepository) FindByEmail(email string) (structs.User, error) {
 	var user structs.User
 
-	err := r.db.Where("email = ?", email).First(&user).Error
+	err := r.db.Where("email = ?", email).Preload("Role").First(&user).Error
 
 	if err != nil {
 		return user, err

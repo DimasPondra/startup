@@ -34,6 +34,7 @@ func Init(db *gorm.DB) {
 	roleController := controllers.NewRoleController(roleService)
 
 	authMiddleware := middlewares.AuthMiddleware(authService, userService)
+	adminMiddleware := middlewares.AdminMiddleware()
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -61,8 +62,8 @@ func Init(db *gorm.DB) {
 
 	api.POST("/midtrans/notification", webhookController.MidtransNotification)
 
-	api.GET("/roles", roleController.Index)
-	api.POST("/roles/store", roleController.Store)
+	api.GET("/roles", authMiddleware, adminMiddleware, roleController.Index)
+	api.POST("/roles/store", authMiddleware, adminMiddleware, roleController.Store)
 
 	// Running in local
 	router.Run()

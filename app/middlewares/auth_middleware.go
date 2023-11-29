@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"startup/app/helpers"
 	"startup/app/services"
+	"startup/app/structs"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,15 @@ func AuthMiddleware(authService services.AuthService, userService services.UserS
 			return
 		}
 
+		expTime, err := claim.GetExpirationTime()
+		if expTime == nil || err != nil {
+			res := helpers.ResponseAPI("Unauthorized.", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, res)
+			return
+		}
+
 		userID := int(claim["user_id"].(float64))
+		roleClaim := claim["role"]
 
 		user, err := userService.GetUserByID(userID)
 		if err != nil {
@@ -52,7 +61,26 @@ func AuthMiddleware(authService services.AuthService, userService services.UserS
 			return
 		}
 
+		if user.Role.Name != roleClaim {
+			res := helpers.ResponseAPI("Unauthorized.", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, res)
+			return
+		}
+
 		c.Set("currentUser", user)
+		c.Next()
+	}
+}
+
+func AdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := c.MustGet("currentUser").(structs.User)
+
+		if user.Role.Name != "admin" {
+			res := helpers.ResponseAPI("Access Denied - You don't have permission to access.", http.StatusForbidden, "error", nil)
+			c.AbortWithStatusJSON(http.StatusForbidden, res)
+		}
+
 		c.Next()
 	}
 }
