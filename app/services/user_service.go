@@ -11,12 +11,12 @@ type UserService interface {
 	Register(request structs.RegisterRequest) (structs.User, error)
 	Login(request structs.LoginRequest) (structs.User, error)
 	IsEmailAvailable(request structs.CheckEmailRequest) (bool, error)
-	SaveAvatar(id int, fileLocation string) (structs.User, error)
+	SaveAvatar(request structs.UploadAvatarRequest) (structs.User, error)
 	GetUserByID(id int) (structs.User, error)
 }
 
 type userService struct {
-	userRepo repositories.UserRepository
+	userRepo    repositories.UserRepository
 	roleService RoleService
 }
 
@@ -79,17 +79,13 @@ func (s *userService) IsEmailAvailable(request structs.CheckEmailRequest) (bool,
 	return false, err
 }
 
-func (s *userService) SaveAvatar(id int, fileLocation string) (structs.User, error) {
-	user, err := s.userRepo.FindByID(id)
+func (s *userService) SaveAvatar(request structs.UploadAvatarRequest) (structs.User, error) {
+	user, err := s.userRepo.FindByID(request.User.ID)
 	if err != nil {
 		return user, err
 	}
 
-	// if user.AvatarFileName != "" {
-	// 	os.Remove(user.AvatarFileName)
-	// }
-
-	// user.AvatarFileName = fileLocation
+	user.FileID = &request.FileID
 
 	userUpdated, err := s.userRepo.Update(user)
 	if err != nil {

@@ -14,10 +14,11 @@ import (
 type userController struct {
 	userService services.UserService
 	authService services.AuthService
+	fileService services.FileService
 }
 
-func NewUserController(userService services.UserService, authService services.AuthService) *userController {
-	return &userController{userService, authService}
+func NewUserController(userService services.UserService, authService services.AuthService, fileService services.FileService) *userController {
+	return &userController{userService, authService, fileService}
 }
 
 func (h *userController) Register(c *gin.Context) {
@@ -63,7 +64,7 @@ func (h *userController) Register(c *gin.Context) {
 		return
 	}
 
-	formatter := structs.UserResponse(user, token)
+	formatter := structs.UserResponse(user, &token)
 	res := helpers.ResponseAPI("Account successfully registered.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
@@ -107,7 +108,7 @@ func (h *userController) Login(c *gin.Context) {
 		return
 	}
 
-	formatter := structs.UserResponse(user, token)
+	formatter := structs.UserResponse(user, &token)
 	res := helpers.ResponseAPI("Successfully logged in.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
@@ -147,44 +148,51 @@ func (h *userController) CheckEmailAvailability(c *gin.Context) {
 }
 
 func (h *userController) UploadAvatar(c *gin.Context) {
-	file, err := c.FormFile("file")
+	var request structs.UploadAvatarRequest
 
+	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		var errors []string
-		errorMessage := gin.H{"errors": append(errors, "Field Avatar is required.")}
+		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
 
-		res := helpers.ResponseAPI("Failed to upload avatar image.", http.StatusUnprocessableEntity, "error", errorMessage)
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	err = app.RegisterExistsInFilesValidation(validate, h.fileService)
+	if err != nil {
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	err = validate.Struct(request)
+	if err != nil {
+		errors := helpers.FormatMessageValidationErrors(err.(validator.ValidationErrors))
+		errorMessage := gin.H{"errors": errors}
+
+		res := helpers.ResponseAPI("Failed to change avatar.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
 
-	filename := helpers.GenerateRandomFileName(file.Filename) // not yet validation file type in here
-	path := "images/avatars/" + filename
+	request.User = c.MustGet("currentUser").(structs.User)
 
-	err = c.SaveUploadedFile(file, path)
+	_, err = h.userService.SaveAvatar(request)
 	if err != nil {
 		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	currentUser := c.MustGet("currentUser").(structs.User)
-
-	_, err = h.userService.SaveAvatar(currentUser.ID, path)
-	if err != nil {
-		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
-		c.JSON(http.StatusInternalServerError, res)
-		return
-	}
-
-	res := helpers.ResponseAPI("Avatar successfully uploaded.", http.StatusOK, "success", nil)
+	res := helpers.ResponseAPI("Avatar successfully updated.", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, res)
 }
 
 func (h *userController) FetchUser(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(structs.User)
 
-	formatter := structs.UserResponse(currentUser, "")
+	formatter := structs.UserResponse(currentUser, nil)
 
 	res := helpers.ResponseAPI("Successfully fetch user data.", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)

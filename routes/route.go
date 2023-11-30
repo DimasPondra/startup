@@ -29,8 +29,7 @@ func Init(db *gorm.DB) {
 	webhookService := services.NewWebhookService(transactionService, campaignService)
 	fileService := services.NewFileService(fileRepo)
 
-
-	userController := controllers.NewUserController(userService, authService)
+	userController := controllers.NewUserController(userService, authService, fileService)
 	campaignController := controllers.NewCampaignController(campaignService, campaignImageService, transactionService)
 	transactionController := controllers.NewTransactionController(transactionService, campaignService)
 	webhookController := controllers.NewWebhookController(webhookService)

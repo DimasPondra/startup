@@ -6,6 +6,7 @@ import (
 )
 
 type FileService interface {
+	GetFileByID(ID int) (structs.File, error)
 	SaveFile(request structs.FileStoreRequest) (structs.File, error)
 }
 
@@ -15,6 +16,15 @@ type fileService struct {
 
 func NewFileService(fileRepo repositories.FileRepository) *fileService {
 	return &fileService{fileRepo}
+}
+
+func (s *fileService) GetFileByID(ID int) (structs.File, error) {
+	file, err := s.fileRepo.FindFileByID(ID)
+	if err != nil {
+		return file, err
+	}
+
+	return file, nil
 }
 
 func (s *fileService) SaveFile(request structs.FileStoreRequest) (structs.File, error) {

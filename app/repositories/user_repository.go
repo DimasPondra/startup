@@ -24,7 +24,7 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 func (r *userRepository) FindByID(id int) (structs.User, error) {
 	var user structs.User
 
-	err := r.db.Preload("Role").First(&user, id).Error
+	err := r.db.Preload("Role").Preload("File").First(&user, id).Error
 
 	if err != nil {
 		return user, err
@@ -36,7 +36,7 @@ func (r *userRepository) FindByID(id int) (structs.User, error) {
 func (r *userRepository) FindByEmail(email string) (structs.User, error) {
 	var user structs.User
 
-	err := r.db.Where("email = ?", email).Preload("Role").First(&user).Error
+	err := r.db.Where("email = ?", email).Preload("Role").Preload("File").First(&user).Error
 
 	if err != nil {
 		return user, err

@@ -15,3 +15,8 @@ type RegisterRequest struct {
 type CheckEmailRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
+
+type UploadAvatarRequest struct {
+	FileID int `json:"file_id" validate:"required,exists_in_files"`
+	User   User
+}

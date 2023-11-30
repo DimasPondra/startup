@@ -97,3 +97,15 @@ func RegisterImageTypeValidation(validate *validator.Validate) error {
 
 	return err
 }
+
+func RegisterExistsInFilesValidation(validate *validator.Validate, fileService services.FileService) error {
+	err := validate.RegisterValidation("exists_in_files", func(fl validator.FieldLevel) bool {
+		value, _, _ := fl.ExtractType(fl.Field())
+
+		file, _ := fileService.GetFileByID(int(value.Int()))
+
+		return file.ID != 0
+	})
+
+	return err
+}
