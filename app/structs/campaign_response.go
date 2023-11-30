@@ -41,7 +41,7 @@ func getImageUrl(campaignImages []CampaignImage) *string {
 	appUrl := os.Getenv("APP_URL")
 
 	if len(campaignImages) > 0 {
-		FileName := appUrl + campaignImages[0].FileName
+		FileName := appUrl + "images/" + campaignImages[0].File.Location + "/" + campaignImages[0].File.Name
 		return &FileName
 	}
 
@@ -88,7 +88,7 @@ func CampaignResponse(campaign Campaign) campaignDetailResponse {
 		isPrimary := image.IsPrimary != 0
 
 		campaignImage := campaignImageResponse{
-			ImageURL:  appUrl + image.FileName,
+			ImageURL:  appUrl + "image/" + image.File.Location + "/" + image.File.Name,
 			IsPrimary: isPrimary,
 		}
 

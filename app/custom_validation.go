@@ -109,3 +109,22 @@ func RegisterExistsInFilesValidation(validate *validator.Validate, fileService s
 
 	return err
 }
+
+func RegisterIDsExistsInFilesValidation(validate *validator.Validate, fileService services.FileService) error {
+	err := validate.RegisterValidation("ids_exists_in_files", func(fl validator.FieldLevel) bool {
+		value, _, _ := fl.ExtractType(fl.Field())
+		IDs := value.Interface().([]int)
+
+		for _, ID := range IDs {
+			file, _ := fileService.GetFileByID(ID)
+
+			if file.ID == 0 {
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return err
+}

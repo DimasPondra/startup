@@ -16,10 +16,11 @@ type campaignController struct {
 	campaignService      services.CampaignService
 	campaignImageService services.CampaignImageService
 	transactionService   services.TransactionService
+	fileService          services.FileService
 }
 
-func NewCampaignController(campaignService services.CampaignService, campaignImageService services.CampaignImageService, transactionService services.TransactionService) *campaignController {
-	return &campaignController{campaignService, campaignImageService, transactionService}
+func NewCampaignController(campaignService services.CampaignService, campaignImageService services.CampaignImageService, transactionService services.TransactionService, fileService services.FileService) *campaignController {
+	return &campaignController{campaignService, campaignImageService, transactionService, fileService}
 }
 
 func (h *campaignController) Index(c *gin.Context) {
@@ -166,23 +167,29 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 		return
 	}
 
-	form, err := c.MultipartForm()
+	var request structs.CampaignImagesUploadRequest
+	err = c.ShouldBindJSON(&request)
 	if err != nil {
-		var errors []string
-		errorMessage := gin.H{"errors": append(errors, "Field Files is required.")}
-
-		res := helpers.ResponseAPI("Failed to upload images.", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, res)
+		res := helpers.ResponseAPI("Something wrong with the request.", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	files := form.File["files[]"]
+	validate := validator.New(validator.WithRequiredStructEnabled())
 
-	if len(files) == 0 {
-		var errors []string
-		errorMessage := gin.H{"errors": append(errors, "Field Files is required.")}
+	err = app.RegisterIDsExistsInFilesValidation(validate, h.fileService)
+	if err != nil {
+		res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
 
-		res := helpers.ResponseAPI("Failed to upload images.", http.StatusUnprocessableEntity, "error", errorMessage)
+	err = validate.Struct(request)
+	if err != nil {
+		errors := helpers.FormatMessageValidationErrors(err.(validator.ValidationErrors))
+		errorMessage := gin.H{"errors": errors}
+
+		res := helpers.ResponseAPI("Failed to upload a campaign images.", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
@@ -194,28 +201,21 @@ func (h *campaignController) UploadImages(c *gin.Context) {
 		return
 	}
 
-	for index, file := range files {
-		primary := index == 0
-
-		filename := helpers.GenerateRandomFileName(file.Filename)
-		path := "images/campaigns/" + filename
-
-		err := c.SaveUploadedFile(file, path)
-		if err != nil {
-			res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusBadRequest, "error", nil)
-			c.JSON(http.StatusBadRequest, res)
-			return
+	for index, ID := range request.FileIDs {
+		campaignImageStore := structs.CampaignImageStoreRequest{
+			IsPrimary:  0,
+			CampaignID: campaign.ID,
+			FileID:     ID,
 		}
 
-		_, err = h.campaignImageService.SaveImage(path, primary, campaign)
-		if err != nil {
-			res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusInternalServerError, "error", nil)
-			c.JSON(http.StatusInternalServerError, res)
-			return
+		if index == 0 {
+			campaignImageStore.IsPrimary = 1
 		}
+
+		h.campaignImageService.SaveImage(campaignImageStore)
 	}
 
-	res := helpers.ResponseAPI("Campaign image successfully uploaded.", http.StatusOK, "success", nil)
+	res := helpers.ResponseAPI("Campaign images successfully uploaded.", http.StatusOK, "success", nil)
 	c.JSON(http.StatusOK, res)
 }
 

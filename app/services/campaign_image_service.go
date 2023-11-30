@@ -1,13 +1,12 @@
 package services
 
 import (
-	"os"
 	"startup/app/repositories"
 	"startup/app/structs"
 )
 
 type CampaignImageService interface {
-	SaveImage(filename string, isPrimary bool, campaign structs.Campaign) (structs.CampaignImage, error)
+	SaveImage(requets structs.CampaignImageStoreRequest) (structs.CampaignImage, error)
 	DeleteImages(campaignID int) (bool, error)
 }
 
@@ -19,20 +18,14 @@ func NewCampaignImageService(campaignImageRepo repositories.CampaignImageReposit
 	return &campaignImageService{campaignImageRepo}
 }
 
-func (s *campaignImageService) SaveImage(filename string, isPrimary bool, campaign structs.Campaign) (structs.CampaignImage, error) {
-	var campaignImage structs.CampaignImage
-	primary := 1
-
-	if !isPrimary {
-		primary = 0
+func (s *campaignImageService) SaveImage(request structs.CampaignImageStoreRequest) (structs.CampaignImage, error) {
+	campignImage := structs.CampaignImage{
+		IsPrimary:  request.IsPrimary,
+		CampaignID: request.CampaignID,
+		FileID:     request.FileID,
 	}
 
-	campaignImage.FileName = filename
-	campaignImage.CampaignID = campaign.ID
-	campaignImage.IsPrimary = primary
-
-	newCampaignImage, err := s.campaignImageRepo.Create(campaignImage)
-
+	newCampaignImage, err := s.campaignImageRepo.Create(campignImage)
 	if err != nil {
 		return newCampaignImage, err
 	}
@@ -44,12 +37,7 @@ func (s *campaignImageService) DeleteImages(campaignID int) (bool, error) {
 	images, _ := s.campaignImageRepo.FindImagesByCampaignID(campaignID)
 
 	if len(images) > 0 {
-		for _, image := range images {
-			os.Remove(image.FileName)
-		}
-
 		_, err := s.campaignImageRepo.DeleteAllImages(images)
-
 		if err != nil {
 			return false, err
 		}

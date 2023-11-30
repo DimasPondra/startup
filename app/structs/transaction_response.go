@@ -38,7 +38,8 @@ func TransactionsSummaryResponse(transactions []Transaction) []transactionSummar
 		}
 
 		if len(transaction.Campaign.CampaignImages) > 0 {
-			filename := appUrl + transaction.Campaign.CampaignImages[0].FileName
+			file := transaction.Campaign.CampaignImages[0].File
+			filename := appUrl + "images/" + file.Location + "/" + file.Name
 			campaignImage = &filename
 		}
 
