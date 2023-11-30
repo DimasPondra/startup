@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"mime/multipart"
 	"startup/app/services"
 	"startup/app/structs"
@@ -81,7 +80,6 @@ func RegisterImageTypeValidation(validate *validator.Validate) error {
 		value, _, _ := fl.ExtractType(fl.Field())
 
 		files := value.Interface().([]*multipart.FileHeader)
-		fmt.Println(len(files))
 
 		for _, file := range files {
 			resultOfSplit := strings.Split(file.Filename, ".")

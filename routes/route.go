@@ -17,6 +17,7 @@ func Init(db *gorm.DB) {
 	campaignImageRepo := repositories.NewCampaignImageRepository(db)
 	transactionRepo := repositories.NewTransactionRepository(db)
 	roleRepo := repositories.NewRoleRepository(db)
+	fileRepo := repositories.NewFileRepository(db)
 
 	roleService := services.NewRoleService(roleRepo)
 	userService := services.NewUserService(userRepo, roleService)
@@ -26,13 +27,15 @@ func Init(db *gorm.DB) {
 	paymentService := services.NewPaymentService()
 	transactionService := services.NewTransactionService(transactionRepo, paymentService)
 	webhookService := services.NewWebhookService(transactionService, campaignService)
+	fileService := services.NewFileService(fileRepo)
+
 
 	userController := controllers.NewUserController(userService, authService)
 	campaignController := controllers.NewCampaignController(campaignService, campaignImageService, transactionService)
 	transactionController := controllers.NewTransactionController(transactionService, campaignService)
 	webhookController := controllers.NewWebhookController(webhookService)
 	roleController := controllers.NewRoleController(roleService)
-	fileController := controllers.NewFileController()
+	fileController := controllers.NewFileController(fileService)
 
 	authMiddleware := middlewares.AuthMiddleware(authService, userService)
 	adminMiddleware := middlewares.AdminMiddleware()
@@ -66,7 +69,7 @@ func Init(db *gorm.DB) {
 	api.GET("/roles", authMiddleware, adminMiddleware, roleController.Index)
 	api.POST("/roles/store", authMiddleware, adminMiddleware, roleController.Store)
 
-	api.POST("files/upload", fileController.Upload)
+	api.POST("files/upload", authMiddleware, fileController.Upload)
 
 	// Running in local
 	router.Run()

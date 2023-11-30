@@ -1,20 +1,22 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"startup/app"
 	"startup/app/helpers"
+	"startup/app/services"
 	"startup/app/structs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
-type fileController struct{}
+type fileController struct{
+	fileService services.FileService
+}
 
-func NewFileController() *fileController {
-	return &fileController{}
+func NewFileController(fileService services.FileService) *fileController {
+	return &fileController{fileService}
 }
 
 func (h *fileController) Upload(c *gin.Context) {
@@ -47,8 +49,38 @@ func (h *fileController) Upload(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("batas loh ini =============")
-	// fmt.Println(errBind.Error())
-	fmt.Println(form.File["files[]"])
-	fmt.Println(form.Value["directory"][0])
+	files := form.File["files[]"]
+	directory := form.Value["directory"][0]
+
+	var newFiles []structs.File
+
+	for _, file := range files {
+		filename := helpers.GenerateRandomFileName(file.Filename)
+		path := "images/" + directory + "/" + filename
+
+		err := c.SaveUploadedFile(file, path)
+		if err != nil {
+			res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusBadRequest, "error", nil)
+			c.JSON(http.StatusBadRequest, res)
+			return
+		}
+
+		storeRequest := structs.FileStoreRequest{
+			Name: filename,
+			Location: directory,
+		}
+		
+		newFile, err := h.fileService.SaveFile(storeRequest)
+		if err != nil {
+			res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusBadRequest, "error", nil)
+			c.JSON(http.StatusBadRequest, res)
+			return
+		}
+
+		newFiles = append(newFiles, newFile)
+	}
+
+	formatter := structs.FilesSummaryResponse(newFiles)
+	res := helpers.ResponseAPI("Files successfully uploaded.", http.StatusOK, "success", formatter)
+	c.JSON(http.StatusOK, res)
 }
