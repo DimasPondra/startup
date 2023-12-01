@@ -27,7 +27,7 @@ func NewCampaignRepository(db *gorm.DB) *campaignRepository {
 func (r *campaignRepository) FindAll() ([]structs.Campaign, error) {
 	var campaigns []structs.Campaign
 
-	err := r.db.Preload("CampaignImages", "is_primary = 1").Find(&campaigns).Error
+	err := r.db.Preload("CampaignImages", "is_primary = 1").Preload("CampaignImages.File").Find(&campaigns).Error
 
 	if err != nil {
 		return campaigns, err
@@ -39,7 +39,7 @@ func (r *campaignRepository) FindAll() ([]structs.Campaign, error) {
 func (r *campaignRepository) FindCampaignsByUserID(userID int) ([]structs.Campaign, error) {
 	var campaigns []structs.Campaign
 
-	err := r.db.Where("user_id = ?", userID).Preload("CampaignImages", "is_primary = 1").Find(&campaigns).Error
+	err := r.db.Where("user_id = ?", userID).Preload("CampaignImages", "is_primary = 1").Preload("CampaignImages.File").Find(&campaigns).Error
 
 	if err != nil {
 		return campaigns, err
@@ -75,7 +75,7 @@ func (r *campaignRepository) FindCampaignByName(name string) (structs.Campaign, 
 func (r *campaignRepository) FindCampaignBySlug(slug string) (structs.Campaign, error) {
 	var campaign structs.Campaign
 
-	err := r.db.Where("slug = ?", slug).Preload("CampaignImages").Preload("User").First(&campaign).Error
+	err := r.db.Where("slug = ?", slug).Preload("CampaignImages.File").Preload("User.File").First(&campaign).Error
 	if err != nil {
 		return campaign, err
 	}

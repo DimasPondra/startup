@@ -29,7 +29,7 @@ func (s *fileService) GetFileByID(ID int) (structs.File, error) {
 
 func (s *fileService) SaveFile(request structs.FileStoreRequest) (structs.File, error) {
 	file := structs.File{
-		Name: request.Name,
+		Name:     request.Name,
 		Location: request.Location,
 	}
 

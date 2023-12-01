@@ -38,7 +38,7 @@ func (r *transactionRepository) FindAll() ([]structs.Transaction, error) {
 func (r *transactionRepository) FindTransactionsByUserID(userID int) ([]structs.Transaction, error) {
 	var transactions []structs.Transaction
 
-	err := r.db.Where("user_id = ?", userID).Preload("Campaign.CampaignImages", "is_primary = 1").Preload("User").Find(&transactions).Error
+	err := r.db.Where("user_id = ?", userID).Preload("Campaign.CampaignImages", "is_primary = 1").Preload("Campaign.CampaignImages.File").Preload("User").Find(&transactions).Error
 
 	if err != nil {
 		return transactions, err
@@ -50,7 +50,7 @@ func (r *transactionRepository) FindTransactionsByUserID(userID int) ([]structs.
 func (r *transactionRepository) FindTransactionsByCampaignID(campaignID int) ([]structs.Transaction, error) {
 	var transactions []structs.Transaction
 
-	err := r.db.Where("campaign_id = ?", campaignID).Preload("Campaign.CampaignImages", "is_primary = 1").Preload("User").Find(&transactions).Error
+	err := r.db.Where("campaign_id = ?", campaignID).Preload("Campaign.CampaignImages", "is_primary = 1").Preload("User.File").Find(&transactions).Error
 
 	if err != nil {
 		return transactions, err

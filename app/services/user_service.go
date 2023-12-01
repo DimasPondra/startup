@@ -80,7 +80,7 @@ func (s *userService) IsEmailAvailable(request structs.CheckEmailRequest) (bool,
 }
 
 func (s *userService) SaveAvatar(request structs.UploadAvatarRequest) (structs.User, error) {
-	user, err := s.userRepo.FindByID(request.User.ID)
+	user, err := s.userRepo.FindByIDWithoutRelation(request.User.ID)
 	if err != nil {
 		return user, err
 	}

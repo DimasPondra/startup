@@ -11,7 +11,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type fileController struct{
+type fileController struct {
 	fileService services.FileService
 }
 
@@ -66,10 +66,10 @@ func (h *fileController) Upload(c *gin.Context) {
 		}
 
 		storeRequest := structs.FileStoreRequest{
-			Name: filename,
+			Name:     filename,
 			Location: directory,
 		}
-		
+
 		newFile, err := h.fileService.SaveFile(storeRequest)
 		if err != nil {
 			res := helpers.ResponseAPI("Server error, something went wrong.", http.StatusBadRequest, "error", nil)

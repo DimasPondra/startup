@@ -14,7 +14,7 @@ func FilesSummaryResponse(files []File) []fileSummaryResponse {
 		url := os.Getenv("APP_URL") + "images/" + file.Location + "/" + file.Name
 
 		fileFormatter := fileSummaryResponse{
-			ID: file.ID,
+			ID:  file.ID,
 			URL: url,
 		}
 

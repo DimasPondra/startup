@@ -8,6 +8,7 @@ import (
 
 type UserRepository interface {
 	FindByID(id int) (structs.User, error)
+	FindByIDWithoutRelation(id int) (structs.User, error)
 	FindByEmail(email string) (structs.User, error)
 	Save(user structs.User) (structs.User, error)
 	Update(user structs.User) (structs.User, error)
@@ -25,6 +26,18 @@ func (r *userRepository) FindByID(id int) (structs.User, error) {
 	var user structs.User
 
 	err := r.db.Preload("Role").Preload("File").First(&user, id).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) FindByIDWithoutRelation(id int) (structs.User, error) {
+	var user structs.User
+
+	err := r.db.First(&user, id).Error
 
 	if err != nil {
 		return user, err

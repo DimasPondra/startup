@@ -62,8 +62,8 @@ type campaignDetailResponse struct {
 }
 
 type campaignUserResponse struct {
-	Name     string `json:"name"`
-	ImageURL string `json:"image_url"`
+	Name     string  `json:"name"`
+	ImageURL *string `json:"image_url"`
 }
 
 type campaignImageResponse struct {
@@ -77,18 +77,19 @@ func CampaignResponse(campaign Campaign) campaignDetailResponse {
 
 	user := campaignUserResponse{
 		Name:     campaign.User.Name,
-		ImageURL: "",
+		ImageURL: nil,
 	}
 
-	// if campaign.User.AvatarFileName != "" {
-	// 	user.ImageURL = appUrl + campaign.User.AvatarFileName
-	// }
+	if campaign.User.FileID != nil {
+		avatarUrl := appUrl + "images/" + campaign.User.File.Location + "/" + campaign.User.File.Name
+		user.ImageURL = &avatarUrl
+	}
 
 	for _, image := range campaign.CampaignImages {
 		isPrimary := image.IsPrimary != 0
 
 		campaignImage := campaignImageResponse{
-			ImageURL:  appUrl + "image/" + image.File.Location + "/" + image.File.Name,
+			ImageURL:  appUrl + "images/" + image.File.Location + "/" + image.File.Name,
 			IsPrimary: isPrimary,
 		}
 
@@ -136,7 +137,7 @@ type campaignTransactionUserResponse struct {
 
 func CampaignTransactionsResponse(transactions []Transaction) []campaignTransactionResponse {
 	listTransactions := []campaignTransactionResponse{}
-	// appUrl := os.Getenv("APP_URL")
+	appUrl := os.Getenv("APP_URL")
 
 	for _, transaction := range transactions {
 		if transaction.Status == "paid" {
@@ -154,10 +155,10 @@ func CampaignTransactionsResponse(transactions []Transaction) []campaignTransact
 				ImageURL: nil,
 			}
 
-			// if transaction.User.AvatarFileName != "" {
-			// 	filename := appUrl + transaction.User.AvatarFileName
-			// 	user.ImageURL = &filename
-			// }
+			if transaction.User.File.ID != 0 {
+				filename := appUrl + "images/" + transaction.User.File.Location + "/" + transaction.User.File.Name
+				user.ImageURL = &filename
+			}
 
 			transactionFormatter.User = user
 

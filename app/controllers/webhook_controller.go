@@ -27,7 +27,7 @@ func (h *webhookController) MidtransNotification(c *gin.Context) {
 
 	err = h.webhookService.MidtransNotification(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
